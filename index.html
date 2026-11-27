@@ -176,6 +176,13 @@ button,input,select{font:inherit;color:inherit}
 .modal{position:fixed;inset:0;z-index:60;background:rgba(8,12,20,.55);display:grid;place-items:center;padding:20px}
 .modal-box{background:var(--panel);border-radius:12px;padding:16px;max-width:min(560px,100%);max-height:90%;display:flex;flex-direction:column;gap:12px;overflow:auto;box-sizing:border-box}
 .modal-box img{max-width:100%;max-height:60vh;object-fit:contain;border:1px solid var(--line);border-radius:6px;align-self:center}
+.crop-box-wrap{width:min(560px,100%)}
+.crop-stage{position:relative;align-self:center;line-height:0;touch-action:none;user-select:none;-webkit-user-select:none;background:repeating-conic-gradient(var(--chip) 0 25%,var(--panel) 0 50%) 0 0/14px 14px;overflow:hidden;border-radius:4px}
+.crop-stage img{max-width:min(520px,80vw);max-height:56vh;display:block;border:0!important;border-radius:0!important;pointer-events:none}
+.crop-rect{position:absolute;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5),0 0 0 9999px rgba(10,20,10,.55);cursor:move}
+.crop-rect i{position:absolute;width:18px;height:18px;background:#fff;border:2px solid #3D963C;border-radius:50%;transform:translate(-50%,-50%)}
+.crop-rect i[data-h="nw"]{left:0;top:0;cursor:nwse-resize}.crop-rect i[data-h="ne"]{left:100%;top:0;cursor:nesw-resize}
+.crop-rect i[data-h="sw"]{left:0;top:100%;cursor:nesw-resize}.crop-rect i[data-h="se"]{left:100%;top:100%;cursor:nwse-resize}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;z-index:70;box-shadow:0 8px 20px rgba(0,0,0,.25);max-width:calc(100% - 40px)}
 
 @media (max-width:860px){
@@ -259,7 +266,7 @@ button,input,select{font:inherit;color:inherit}
         <div class="field">
           <label for="logoTarget">Tempel di</label>
           <select class="inp" id="logoTarget">
-            <option value="sel">Bagian yang dipilih di kanvas</option>
+            <option value="sel" id="optSel">Bagian terpilih (ketuk bagian gambar dulu)</option>
             <option value="all">Seluruh desain (di dalam garis luar)</option>
           </select>
         </div>
@@ -274,6 +281,11 @@ button,input,select{font:inherit;color:inherit}
         <div class="range"><label for="lgSize">Ukuran</label><input type="range" id="lgSize" min="2" max="150" step="0.5"><output id="lgSizeO"></output></div>
         <div class="range"><label for="lgRot">Putar</label><input type="range" id="lgRot" min="-180" max="180" step="1"><output id="lgRotO"></output></div>
         <div class="range"><label for="lgOp">Opasitas</label><input type="range" id="lgOp" min="10" max="100" step="1"><output id="lgOpO"></output></div>
+        <div class="row">
+          <button class="btn sm" id="lgCrop"><svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>Crop</button>
+          <button class="btn sm" id="lgFlipH" title="Balik horizontal"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7 3 12l5 5V7z"/><path d="M16 7l5 5-5 5V7z"/></svg>Balik ↔</button>
+          <button class="btn sm" id="lgFlipV" title="Balik vertikal"><svg viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M7 8l5-5 5 5H7z"/><path d="M7 16l5 5 5-5H7z"/></svg>Balik ↕</button>
+        </div>
         <div class="row">
           <button class="btn sm" id="lgCenter">Tengahkan</button>
           <button class="btn sm" id="lgRetarget">Pindah ke bagian terpilih</button>
@@ -368,6 +380,25 @@ button,input,select{font:inherit;color:inherit}
   </div>
 </div>
 
+<div class="modal" id="cropModal" hidden>
+  <div class="modal-box crop-box-wrap">
+    <div class="lbl">Crop gambar <span>seret kotak atau sudutnya</span></div>
+    <div class="crop-stage" id="cropStage">
+      <img id="cropImg" alt="Gambar yang di-crop" draggable="false">
+      <div class="crop-rect" id="cropRect">
+        <i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i>
+      </div>
+    </div>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Rasio crop"><button id="crFree" aria-pressed="true">Bebas</button><button id="crSquare" aria-pressed="false">Persegi</button></div>
+      <button class="btn sm ghost" id="crReset">Tanpa crop</button>
+      <span class="sp"></span>
+      <button class="btn sm" id="crCancel">Batal</button>
+      <button class="btn sm primary" id="crApply">Terapkan</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 <input type="file" id="svgFile" accept=".svg,image/svg+xml" hidden>
 <input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp" hidden>
@@ -381,7 +412,7 @@ const PARTS = new Set(['path','rect','circle','ellipse','polygon','polyline','li
 const SKIP = new Set(['defs','clippath','mask','pattern','symbol','marker','lineargradient','radialgradient','filter']);
 const stage = $('#stage'), board = $('#board'), zoomer = $('#zoomer');
 
-let svg = null, selPart = null, selLogo = null;
+let svg = null, selPart = null, selLogo = null, lastPart = null;
 let hist = [], hi = -1, original = '', dirty = false;
 let bg = '#D8E9D7';
 let meta = { name: 'Sample', code: genCode() };
@@ -525,9 +556,10 @@ function commit(){
   hi = hist.length - 1; setDirty(true); updUndo();
 }
 function restore(s){
-  const keepLogo = selLogo && selLogo.dataset.logo, keepPart = selPart && selPart.dataset.part;
+  const keepLogo = selLogo && selLogo.dataset.logo, keepPart = selPart && selPart.dataset.part, keepLast = lastPart && lastPart.dataset.part;
   loadSVG(s);
   if (keepPart) selPart = svg.querySelector(`[data-part="${keepPart}"]`);
+  if (keepLast) lastPart = svg.querySelector(`[data-part="${keepLast}"]`);
   if (keepLogo) selLogo = svg.querySelector(`[data-logo="${keepLogo}"]`);
   refresh();
 }
@@ -567,8 +599,9 @@ function renderSel(){
   const on = !!(selPart && selPart.isConnected);
   $('#selSec').hidden = !on;
   renderDock();
-  const tgt = $('#logoTarget'); tgt.options[0].disabled = !on; if (!on && tgt.value === 'sel') tgt.value = 'all'; if (on) tgt.value = 'sel';
-  $('#lgRetarget').disabled = !on;
+  const lp = lastPart && lastPart.isConnected ? lastPart : null;
+  $('#optSel').textContent = lp ? `Bagian terpilih (${lp.dataset.part})` : 'Bagian terpilih (ketuk bagian gambar dulu)';
+  $('#lgRetarget').disabled = !lp || (selLogo && selLogo.dataset.target === lp.dataset.part);
   if (!on) return;
   $('#selId').textContent = selPart.dataset.part;
   const fh = toHex(fillOf(selPart)), sh = toHex(strokeOf(selPart));
@@ -586,7 +619,7 @@ function renderSel(){
 }
 
 /* ---------- selection & overlay ---------- */
-function selectPart(el){ selPart = el; selLogo = null; renderSel(); renderLogos(); drawUI(); }
+function selectPart(el){ selPart = el; lastPart = el; selLogo = null; renderSel(); renderLogos(); drawUI(); }
 function selectLogo(g){ selLogo = g; selPart = null; renderSel(); renderLogos(); drawUI(); }
 function clearSel(){ selPart = null; selLogo = null; renderSel(); renderLogos(); drawUI(); }
 function drawUI(){
@@ -607,8 +640,8 @@ function drawUI(){
     const d = selLogo.dataset, w = +d.w, h = w * +d.ar, cx = +d.cx, cy = +d.cy, rot = +d.rot;
     const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `rotate(${rot} ${cx} ${cy})`);
     const r = document.createElementNS(NS, 'rect');
-    Object.entries({ x: cx - w/2, y: cy - h/2, width: w, height: h, 'data-ui': 'move' }).forEach(([k, v]) => r.setAttribute(k, v));
-    r.setAttribute('style', 'fill:rgba(61,150,60,0.05);stroke:#3D963C;stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;cursor:move');
+    Object.entries({ x: cx - w/2, y: cy - h/2, width: w, height: h }).forEach(([k, v]) => r.setAttribute(k, v));
+    r.setAttribute('style', 'fill:none;stroke:#3D963C;stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;pointer-events:none');
     const hd = document.createElementNS(NS, 'circle');
     Object.entries({ cx: cx + w/2, cy: cy + h/2, r: 8 * px, 'data-ui': 'scale' }).forEach(([k, v]) => hd.setAttribute(k, v));
     hd.setAttribute('style', 'fill:#ffffff;stroke:#3D963C;stroke-width:2;vector-effect:non-scaling-stroke;cursor:nwse-resize');
@@ -651,7 +684,8 @@ function updateLogo(g){
   const img = g.querySelector('image');
   img.setAttribute('x', cx - w/2); img.setAttribute('y', cy - h/2);
   img.setAttribute('width', w); img.setAttribute('height', h);
-  img.setAttribute('transform', `rotate(${+d.rot} ${cx} ${cy})`);
+  const fx = +d.fx || 1, fy = +d.fy || 1;
+  img.setAttribute('transform', `rotate(${+d.rot} ${cx} ${cy})` + (fx !== 1 || fy !== 1 ? ` translate(${cx} ${cy}) scale(${fx} ${fy}) translate(${-cx} ${-cy})` : ''));
   img.setAttribute('opacity', d.op);
 }
 function addLogo(href, nw, nh, target, silent){
@@ -712,7 +746,102 @@ function setRange(id, v, fmt){ const r = $('#' + id); r.value = v; $('#' + id + 
 $('#lgCenter').onclick = () => { if (!selLogo) return; const te = targetEl(selLogo.dataset.target); const b = te ? partBox(te) : vbBox(); selLogo.dataset.cx = b.x + b.w/2; selLogo.dataset.cy = b.y + b.h/2; updateLogo(selLogo); drawUI(); commit(); };
 $('#lgDel').onclick = () => selLogo && deleteLogo(selLogo);
 $('#lgAll').onclick = () => selLogo && retarget(selLogo, 'all');
-let lastPart = null;
+$('#lgFlipH').onclick = () => { if (!selLogo) return; selLogo.dataset.fx = -(+selLogo.dataset.fx || 1); updateLogo(selLogo); commit(); };
+$('#lgFlipV').onclick = () => { if (!selLogo) return; selLogo.dataset.fy = -(+selLogo.dataset.fy || 1); updateLogo(selLogo); commit(); };
+
+/* ---------- crop ---------- */
+let crop = null;
+function loadImg(src){ return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; }); }
+$('#lgCrop').onclick = async () => {
+  if (!selLogo) return;
+  const g = selLogo, img = g.querySelector('image');
+  const orig = g.dataset.orig || img.getAttribute('href');
+  let im; try { im = await loadImg(orig); } catch (_) { toast('Gambar tidak bisa dibuka untuk di-crop.'); return; }
+  const W = im.naturalWidth, H = im.naturalHeight;
+  const c = (g.dataset.crop || `0,0,${W},${H}`).split(',').map(Number);
+  crop = { g, orig, im, W, H, r: { x: c[0] / W, y: c[1] / H, w: c[2] / W, h: c[3] / H }, square: false };
+  $('#cropImg').src = orig; $('#cropModal').hidden = false;
+  setCropMode(false);
+  requestAnimationFrame(paintCrop);
+};
+function paintCrop(){
+  if (!crop) return;
+  const el = $('#cropRect'), { r } = crop;
+  el.style.left = (r.x * 100) + '%'; el.style.top = (r.y * 100) + '%';
+  el.style.width = (r.w * 100) + '%'; el.style.height = (r.h * 100) + '%';
+}
+function setCropMode(sq){
+  crop.square = sq;
+  $('#crFree').setAttribute('aria-pressed', !sq); $('#crSquare').setAttribute('aria-pressed', sq);
+  if (sq){
+    const st = $('#cropStage').getBoundingClientRect(), r = crop.r;
+    const sidePx = Math.min(r.w * st.width, r.h * st.height);
+    const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+    r.w = sidePx / st.width; r.h = sidePx / st.height;
+    r.x = Math.min(Math.max(0, cx - r.w / 2), 1 - r.w); r.y = Math.min(Math.max(0, cy - r.h / 2), 1 - r.h);
+    paintCrop();
+  }
+}
+$('#crFree').onclick = () => setCropMode(false);
+$('#crSquare').onclick = () => setCropMode(true);
+$('#crReset').onclick = () => { crop.r = { x: 0, y: 0, w: 1, h: 1 }; setCropMode(false); paintCrop(); };
+$('#crCancel').onclick = () => { $('#cropModal').hidden = true; crop = null; };
+(() => {
+  const stage = $('#cropStage'); let d = null;
+  stage.addEventListener('pointerdown', e => {
+    if (!crop) return;
+    const h = e.target.dataset && e.target.dataset.h;
+    const onRect = e.target.closest('#cropRect');
+    if (!h && !onRect) return;
+    const st = stage.getBoundingClientRect();
+    d = { h: h || 'move', sx: e.clientX, sy: e.clientY, r0: { ...crop.r }, st };
+    stage.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  stage.addEventListener('pointermove', e => {
+    if (!d) return;
+    const dx = (e.clientX - d.sx) / d.st.width, dy = (e.clientY - d.sy) / d.st.height;
+    const r0 = d.r0, MIN = 0.04; let { x, y, w, h } = r0;
+    if (d.h === 'move'){ x = Math.min(Math.max(0, r0.x + dx), 1 - r0.w); y = Math.min(Math.max(0, r0.y + dy), 1 - r0.h); }
+    else {
+      let x1 = r0.x, y1 = r0.y, x2 = r0.x + r0.w, y2 = r0.y + r0.h;
+      if (d.h.includes('w')) x1 = Math.min(Math.max(0, x1 + dx), x2 - MIN);
+      if (d.h.includes('e')) x2 = Math.max(Math.min(1, x2 + dx), x1 + MIN);
+      if (d.h.includes('n')) y1 = Math.min(Math.max(0, y1 + dy), y2 - MIN);
+      if (d.h.includes('s')) y2 = Math.max(Math.min(1, y2 + dy), y1 + MIN);
+      x = x1; y = y1; w = x2 - x1; h = y2 - y1;
+      if (crop.square){
+        const ar = d.st.width / d.st.height;
+        const sidePx = Math.min(w * d.st.width, h * d.st.height);
+        const nw = sidePx / d.st.width, nh = sidePx / d.st.height;
+        if (d.h.includes('w')) x = x2 - nw; if (d.h.includes('n')) y = y2 - nh;
+        w = nw; h = nh;
+      }
+    }
+    crop.r = { x, y, w, h }; paintCrop();
+  });
+  const up = () => { d = null; };
+  stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
+})();
+$('#crApply').onclick = () => {
+  if (!crop) return;
+  const { g, orig, im, W, H, r } = crop;
+  const sx = Math.round(r.x * W), sy = Math.round(r.y * H), sw = Math.max(1, Math.round(r.w * W)), sh = Math.max(1, Math.round(r.h * H));
+  const full = sx === 0 && sy === 0 && sw === W && sh === H;
+  let href = orig;
+  if (!full){
+    const c = document.createElement('canvas'); c.width = sw; c.height = sh;
+    c.getContext('2d').drawImage(im, sx, sy, sw, sh, 0, 0, sw, sh);
+    href = /^data:image\/jpeg/i.test(orig) ? c.toDataURL('image/jpeg', 0.92) : c.toDataURL('image/png');
+  }
+  const img = g.querySelector('image'), d = g.dataset;
+  const prevCrop = (d.crop || `0,0,${W},${H}`).split(',').map(Number);
+  d.w = +d.w * sw / prevCrop[2];
+  d.ar = sh / sw;
+  d.orig = orig; d.crop = `${sx},${sy},${sw},${sh}`;
+  img.setAttribute('href', href); img.setAttributeNS(XL, 'xlink:href', href);
+  updateLogo(g); $('#cropModal').hidden = true; crop = null;
+  commit(); renderLogos(); drawUI(); toast(full ? 'Crop dihapus.' : 'Gambar di-crop.');
+};
 $('#lgRetarget').onclick = () => { if (selLogo && lastPart && lastPart.isConnected) retarget(selLogo, lastPart.dataset.part); };
 
 function readLogoFile(file){
@@ -729,8 +858,8 @@ function readLogoFile(file){
         c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
         src = c.toDataURL(file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png', 0.92); w = c.width; h = c.height;
       }
-      const useSel = $('#logoTarget').value === 'sel' && lastPart && lastPart.isConnected;
-      addLogo(src, w, h, useSel ? lastPart.dataset.part : 'all');
+      const t = logoTargetNow(); if (!t) return;
+      addLogo(src, w, h, t);
       switchTab('logo'); toast('Gambar ditempel. Seret untuk mengatur posisi.');
     };
     im.onerror = () => toast('Gambar tidak bisa dibaca.');
@@ -738,8 +867,15 @@ function readLogoFile(file){
   };
   fr.readAsDataURL(file);
 }
-$('#logoDrop').onclick = () => $('#logoFile').click();
-$('#logoDrop').onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $('#logoFile').click(); } };
+function logoTargetNow(){
+  if ($('#logoTarget').value === 'all') return 'all';
+  if (lastPart && lastPart.isConnected) return lastPart.dataset.part;
+  toast('Ketuk dulu bagian gambar tempat logo akan ditempel.');
+  return null;
+}
+function pickLogo(){ if (logoTargetNow()) $('#logoFile').click(); }
+$('#logoDrop').onclick = pickLogo;
+$('#logoDrop').onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pickLogo(); } };
 $('#logoFile').onchange = e => { readLogoFile(e.target.files[0]); e.target.value = ''; };
 ['dragover', 'dragleave', 'drop'].forEach(ev => $('#logoDrop').addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); if (ev === 'drop') readLogoFile(e.dataTransfer.files[0]); }));
 
@@ -842,7 +978,7 @@ $('#selSame').onclick = () => {
   const els = parts().filter(p => toHex(fillOf(p)) === cur);
   openPicker($('#selSame'), cur, h => els.forEach(p => p.style.fill = h), () => { commit(); refresh(); });
 };
-$('#selLogo').onclick = () => { switchTab('logo'); $('#logoTarget').value = 'sel'; $('#logoFile').click(); };
+$('#selLogo').onclick = () => { switchTab('logo'); $('#logoTarget').value = 'sel'; pickLogo(); };
 $('#selClear').onclick = clearSel;
 
 /* ---------- background ---------- */
@@ -1024,6 +1160,7 @@ async function getDL(){ return localDL; }
 function cleanSvgString(viewBox, w, h){
   const c = svg.cloneNode(true); c.querySelector('#__ui')?.remove();
   c.removeAttribute('data-studio');
+  c.querySelectorAll('.__logo').forEach(g => { g.removeAttribute('data-orig'); g.removeAttribute('data-crop'); });
   if (viewBox) c.setAttribute('viewBox', viewBox);
   if (w){ c.setAttribute('width', w); c.setAttribute('height', h); }
   return new XMLSerializer().serializeToString(c);
@@ -1222,7 +1359,7 @@ document.addEventListener('keydown', e => {
   else if (!typing && !e.ctrlKey && !e.metaKey && (e.key === '+' || e.key === '=')){ zoomCenter(1.35); }
   else if (!typing && !e.ctrlKey && !e.metaKey && (e.key === '-' || e.key === '_')){ zoomCenter(1 / 1.35); }
   else if (!typing && !e.ctrlKey && !e.metaKey && e.key === '0'){ fitZoom(); }
-  else if (e.key === 'Escape'){ if (pk) closePicker(); else { $('#exportPop').hidden = true; $('#modal').hidden = true; clearSel(); } }
+  else if (e.key === 'Escape'){ if (pk) closePicker(); else if (!$('#cropModal').hidden){ $('#cropModal').hidden = true; crop = null; } else { $('#exportPop').hidden = true; $('#modal').hidden = true; clearSel(); } }
 });
 
 /* ---------- sample ---------- */

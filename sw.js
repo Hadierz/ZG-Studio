@@ -1,6 +1,6 @@
 /* Zona Green Studio — service worker
    Ganti VERSION setiap kali index.html diperbarui agar pengguna mendapat versi baru. */
-const VERSION = 'zgs-v1';
+const VERSION = 'zgs-v2';
 const FONT_CACHE = 'zgs-fonts';
 const CORE = [
   './',
