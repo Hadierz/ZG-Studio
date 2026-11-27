@@ -1,6 +1,19 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Editor SVG: warnai tiap bagian, tempel logo di dalam garis, ganti latar, export JPG, simpan desain dengan nama/kode.">
+<meta name="theme-color" content="#245223">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Zona Green">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Zona Green Studio</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
 <style>
@@ -36,6 +49,7 @@ button,input,select{font:inherit;color:inherit}
 /* toolbar */
 .top{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px}
 .brand{display:flex;align-items:center;gap:10px;margin-right:6px}
+.brand-logo{width:34px;height:34px;flex:none;display:block}
 .brand-mark{width:30px;height:30px;border-radius:7px;background:conic-gradient(from 200deg,#D8E9D7,#C0DABF,#88BD87,#3D963C,#245223,#D8E9D7);display:grid;place-items:center}
 .brand-mark::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--panel)}
 .brand h1{font-size:15px;font-weight:800;margin:0;letter-spacing:.04em;text-transform:uppercase;color:var(--primary)}
@@ -176,10 +190,11 @@ button,input,select{font:inherit;color:inherit}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.sw:hover,.pk-grid button:hover{transform:none}}
 </style>
-
+</head>
+<body>
 <div class="app">
   <header class="top">
-    <div class="brand"><div class="brand-mark" aria-hidden="true"></div><h1>Zona <span>Green</span> Studio</h1></div>
+    <div class="brand"><img class="brand-logo" src="icons/logo-64.png" alt="" width="34" height="34"><h1>Zona <span>Green</span> Studio</h1></div>
     <div class="doc-meta"><b id="metaName">Sample</b><span class="code" id="metaCode">SVG-00000</span><span id="metaDirty"></span></div>
     <div class="sp"></div>
     <div class="grp">
@@ -195,6 +210,7 @@ button,input,select{font:inherit;color:inherit}
     <div class="grp">
       <button class="btn ghost" id="resetBtn">Reset</button>
       <button class="btn" id="saveBtn"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg>Simpan</button>
+      <button class="btn" id="installBtn" hidden>Pasang aplikasi</button>
       <button class="btn primary" id="exportBtn"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export</button>
     </div>
   </header>
@@ -983,9 +999,27 @@ $('#resetBtn').onclick = () => { if (!original) return; loadSVG(original); commi
 $('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo;
 
 /* ---------- export ---------- */
-let dlP = null;
-try { if (window.claude && window.claude.use) dlP = window.claude.use('downloads').catch(() => null); } catch (e) {}
-async function getDL(){ if (!dlP && window.claude && window.claude.use) dlP = window.claude.use('downloads').catch(() => null); return dlP ? await dlP : null; }
+/* unduhan mandiri (tanpa Claude): bagikan/simpan di ponsel, unduh biasa di komputer */
+const MIME = { jpg: 'image/jpeg', svg: 'image/svg+xml', json: 'application/json' };
+const localDL = {
+  async save({ filename, data }){
+    const ext = filename.split('.').pop().toLowerCase();
+    const blob = data instanceof Blob ? data : new Blob([data], { type: MIME[ext] || 'application/octet-stream' });
+    const coarse = matchMedia('(pointer: coarse)').matches;
+    if (coarse && navigator.canShare && typeof File === 'function'){
+      const file = new File([blob], filename, { type: blob.type });
+      if (navigator.canShare({ files: [file] })){
+        try { await navigator.share({ files: [file], title: filename }); return; }
+        catch (e){ if (e && e.name === 'AbortError'){ const err = new Error('declined'); err.code = 'declined'; throw err; } }
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.rel = 'noopener';
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  }
+};
+async function getDL(){ return localDL; }
 
 function cleanSvgString(viewBox, w, h){
   const c = svg.cloneNode(true); c.querySelector('#__ui')?.remove();
@@ -1043,7 +1077,7 @@ async function renderCanvas(long, marginPct){
 function showFallback(blob, title){
   const u = URL.createObjectURL(blob);
   $('#modalTitle').textContent = title;
-  $('#modalText').textContent = 'Penyimpanan otomatis tidak tersedia di tampilan ini. Tekan lama gambar (ponsel) atau klik kanan lalu pilih "Simpan gambar".';
+  $('#modalText').textContent = 'Unduhan otomatis gagal. Tekan lama gambar (ponsel) atau klik kanan lalu pilih "Simpan gambar".';
   $('#modalImg').src = u; $('#modal').hidden = false;
 }
 $('#modalClose').onclick = () => { $('#modal').hidden = true; };
@@ -1270,5 +1304,15 @@ function sampleLogo(){
 })();
 })();
 </script>
-
-</body></html>
+<script>
+/* PWA: service worker & tombol pasang */
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+(() => {
+  let deferred = null; const btn = document.getElementById('installBtn');
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; btn.hidden = false; });
+  btn.addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (_) {} deferred = null; btn.hidden = true; });
+  window.addEventListener('appinstalled', () => { btn.hidden = true; });
+})();
+</script>
+</body>
+</html>

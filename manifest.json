@@ -1,0 +1,20 @@
+{
+  "name": "Zona Green Studio",
+  "short_name": "Zona Green",
+  "description": "Editor SVG untuk mewarnai tiap bagian, menempel logo di dalam garis, mengganti latar, export JPG, dan menyimpan desain dengan nama atau kode.",
+  "lang": "id",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#D8E9D7",
+  "theme_color": "#245223",
+  "categories": ["design", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
