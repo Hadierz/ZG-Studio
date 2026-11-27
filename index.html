@@ -1,0 +1,1274 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Zona Green Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: toolbar di atas, panel alat di kiri, kanvas desain mengisi sisa layar; menumpuk di ponsel */
+/* Palet Zona Green: #D8E9D7 #C0DABF #88BD87 #3D963C #245223 */
+:root{
+  --ground:#D8E9D7; --panel:#fbfdfa; --line:#C0DABF; --line-strong:#88BD87;
+  --ink:#16301a; --muted:#4a6a49; --accent:#3D963C; --accent-ink:#ffffff; --accent-soft:#e3f0e2;
+  --primary:#245223; --primary-ink:#ffffff;
+  --danger:#c62f3a; --ok:#3D963C; --chip:#eef6ed;
+  --f-ui:"Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0e1a0f; --panel:#152516; --line:#245223; --line-strong:#3D963C;
+  --ink:#e4f0e3; --muted:#9dbd9c; --accent:#88BD87; --accent-ink:#0e1a0f; --accent-soft:#1d381e;
+  --primary:#88BD87; --primary-ink:#0e1a0f;
+  --danger:#ff7a80; --ok:#88BD87; --chip:#1b301c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0e1a0f; --panel:#152516; --line:#245223; --line-strong:#3D963C;
+  --ink:#e4f0e3; --muted:#9dbd9c; --accent:#88BD87; --accent-ink:#0e1a0f; --accent-soft:#1d381e;
+  --primary:#88BD87; --primary-ink:#0e1a0f;
+  --danger:#ff7a80; --ok:#88BD87; --chip:#1b301c; color-scheme:dark}
+
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+.app{height:100%;display:grid;grid-template-columns:330px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;box-sizing:border-box}
+
+/* toolbar */
+.top{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:6px}
+.brand-mark{width:30px;height:30px;border-radius:7px;background:conic-gradient(from 200deg,#D8E9D7,#C0DABF,#88BD87,#3D963C,#245223,#D8E9D7);display:grid;place-items:center}
+.brand-mark::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--panel)}
+.brand h1{font-size:15px;font-weight:800;margin:0;letter-spacing:.04em;text-transform:uppercase;color:var(--primary)}
+.brand h1 span{color:var(--accent)}
+.doc-meta{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;min-width:0}
+.doc-meta b{color:var(--ink);font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code{font-family:var(--f-mono);font-size:11.5px;background:var(--chip);border:1px solid var(--line);padding:1px 6px;border-radius:5px;letter-spacing:.02em}
+.sp{flex:1}
+.grp{display:flex;gap:6px;align-items:center}
+.sep{width:1px;height:24px;background:var(--line)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:7px;border:1px solid var(--line-strong);background:var(--panel);cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap}
+.btn:hover{background:var(--chip)}
+.btn:focus-visible,.sw:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.4;cursor:default;background:var(--panel)}
+.btn.icon{width:34px;padding:0;justify-content:center}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.btn.primary:hover{filter:brightness(1.15);background:var(--primary)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--chip)}
+.btn.danger{color:var(--danger)}
+.btn.sm{height:28px;padding:0 9px;font-size:12px}
+.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.bg-dot{width:16px;height:16px;border-radius:50%;border:1px solid var(--line-strong);flex:none}
+
+/* sidebar */
+.side{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--line);padding:0 6px;flex:none}
+.tab{flex:1;background:none;border:0;padding:12px 4px 10px;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.pane{overflow:auto;padding:14px 14px 20px;display:flex;flex-direction:column;gap:18px;min-height:0;flex:1}
+.sec{display:flex;flex-direction:column;gap:9px}
+.sec + .sec{border-top:1px solid var(--line);padding-top:16px}
+.sec[hidden] + .sec{border-top:0;padding-top:0}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lbl span{letter-spacing:0;text-transform:none;font-weight:500}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.sws{display:flex;flex-wrap:wrap;gap:8px}
+.sw{width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.18);cursor:pointer;padding:0;position:relative;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.sw.sq{border-radius:7px}
+.sw:hover{transform:scale(1.08)}
+.sw .n{position:absolute;right:-5px;bottom:-5px;background:var(--panel);color:var(--muted);border:1px solid var(--line);font-size:9.5px;font-weight:700;border-radius:8px;padding:0 4px;line-height:14px;font-variant-numeric:tabular-nums}
+.more{font-size:12px;color:var(--muted);align-self:center}
+.selbox{border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.selrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.selrow .pair{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600}
+.pal{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer;background:var(--panel);width:100%;text-align:left}
+.pal:hover{border-color:var(--line-strong);background:var(--chip)}
+.pal-name{font-size:12.5px;font-weight:600;flex:1;min-width:0}
+.pal-strip{display:flex;height:16px;width:120px;border-radius:9px;overflow:hidden;flex:none}
+.pal-strip i{flex:1}
+.check{display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.field label{font-size:12px;font-weight:600;color:var(--muted)}
+.inp{height:34px;border:1px solid var(--line-strong);border-radius:7px;background:var(--panel);padding:0 10px;min-width:0;width:100%;box-sizing:border-box}
+.inp.mono{font-family:var(--f-mono);font-size:12.5px;text-transform:uppercase}
+.range{display:grid;grid-template-columns:62px 1fr 42px;align-items:center;gap:8px;font-size:12.5px}
+.range output{font-variant-numeric:tabular-nums;text-align:right;color:var(--muted);font-size:12px}
+.range input{width:100%;accent-color:var(--accent)}
+.drop{border:1.5px dashed var(--line-strong);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:4px;align-items:center;background:var(--chip)}
+.drop:hover{border-color:var(--accent)}
+.drop strong{font-size:13px}
+.logos{display:flex;flex-direction:column;gap:6px}
+.logo-it{display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;cursor:pointer;background:var(--panel)}
+.logo-it.on{border-color:var(--accent);background:var(--accent-soft)}
+.logo-it img{width:34px;height:34px;object-fit:contain;background:repeating-conic-gradient(var(--chip) 0 25%,var(--panel) 0 50%) 0 0/10px 10px;border-radius:4px}
+.logo-it .t{flex:1;min-width:0;font-size:12.5px}
+.logo-it .t small{display:block;color:var(--muted)}
+.lib{display:flex;flex-direction:column;gap:8px}
+.card{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:7px;padding:7px;background:var(--panel)}
+.card.cur{border-color:var(--accent)}
+.card img{width:58px;height:58px;object-fit:cover;border-radius:5px;background:var(--chip)}
+.card .nm{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .dt{font-size:11.5px;color:var(--muted)}
+.card .acts{display:flex;flex-direction:column;gap:4px}
+.empty{font-size:12.5px;color:var(--muted);text-align:center;padding:16px 8px;border:1px dashed var(--line);border-radius:7px}
+
+/* workspace */
+.work{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px}
+.board{flex:1;min-height:0;border-radius:var(--r);border:1px solid var(--line);position:relative;overflow:hidden;transition:background-color .15s}
+#stage{position:absolute;inset:0;padding:5%;color:#000;touch-action:none}
+#stage{cursor:grab}
+#zoomer{width:100%;height:100%;transform-origin:0 0;will-change:transform}
+#stage svg{width:100%;height:100%;display:block;overflow:visible}
+.zoombar{position:absolute;right:calc(10px + env(safe-area-inset-right,0px));bottom:10px;z-index:2;display:flex;gap:2px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:3px;box-shadow:0 4px 14px rgba(10,20,40,.12)}
+.zoombar .btn.icon.sm{width:30px;height:30px}
+#zPct{min-width:54px;justify-content:center;font-variant-numeric:tabular-nums}
+#stage [data-part]{cursor:pointer}
+#stage [data-part]:hover{filter:brightness(1.1) saturate(1.05)}
+#stage .__logo{cursor:move}
+.board.dragover::after{content:"Lepaskan file di sini";position:absolute;inset:10px;border:2px dashed var(--accent);border-radius:8px;display:grid;place-items:center;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--panel) 80%,transparent)}
+.dock{flex:none;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.dock-head{display:flex;gap:8px;align-items:center;min-width:0}
+.dock-cur{display:inline-flex;align-items:center;gap:8px}
+.dock-cur i{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.2);flex:none;background:repeating-linear-gradient(45deg,#ccc 0 3px,#fff 3px 6px)}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden;flex:none}
+.seg button{border:0;background:var(--panel);padding:0 12px;height:32px;font-weight:600;font-size:12.5px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:disabled{opacity:.4;cursor:default}
+.dock-used{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;padding:2px}
+.dock-grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(3,26px);grid-auto-columns:26px;gap:5px;overflow-x:auto;padding:2px 2px 4px}
+.dock .c{width:26px;height:26px;border-radius:6px;border:1px solid rgba(0,0,0,.16);padding:0;cursor:pointer;flex:none}
+.dock .c:hover{transform:scale(1.1)}
+.dock.off .c{opacity:.45}
+
+/* popovers */
+.pop{position:fixed;z-index:50;background:var(--panel);border:1px solid var(--line-strong);border-radius:10px;box-shadow:0 12px 32px rgba(10,20,40,.22);padding:12px;display:flex;flex-direction:column;gap:10px;width:244px;box-sizing:border-box}
+#picker{width:280px;max-height:calc(100vh - 16px);overflow:auto}
+.pk-sv{position:relative;height:150px;flex:none;border-radius:7px;cursor:crosshair;touch-action:none;background-image:linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,rgba(255,255,255,0))}
+.pk-th{position:absolute;width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.3);transform:translate(-50%,-50%);pointer-events:none}
+.pk-hue{-webkit-appearance:none;appearance:none;width:100%;height:14px;margin:0;border-radius:7px;cursor:pointer;background:linear-gradient(to right,#f00,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,#f00)}
+.pk-hue::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.3)}
+.pk-hue::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.3)}
+.pk-lbl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pk-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
+.pk-grid button{aspect-ratio:1;max-width:100%;border-radius:4px;border:1px solid rgba(0,0,0,.15);cursor:pointer;padding:0}
+.sws.mini{gap:6px}.sws.mini .sw{width:24px;height:24px}
+.pk-grid button:hover{transform:scale(1.12)}
+.pk-row{display:flex;gap:8px;align-items:center}
+.pk-prev{width:34px;height:34px;border-radius:7px;border:1px solid var(--line-strong);flex:none}
+.pk-native{position:relative;overflow:hidden}
+.pk-native input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+#exportPop{width:270px}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(8,12,20,.55);display:grid;place-items:center;padding:20px}
+.modal-box{background:var(--panel);border-radius:12px;padding:16px;max-width:min(560px,100%);max-height:90%;display:flex;flex-direction:column;gap:12px;overflow:auto;box-sizing:border-box}
+.modal-box img{max-width:100%;max-height:60vh;object-fit:contain;border:1px solid var(--line);border-radius:6px;align-self:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;z-index:70;box-shadow:0 8px 20px rgba(0,0,0,.25);max-width:calc(100% - 40px)}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto;min-height:100%}
+  .work{order:1;height:auto}
+  .board{flex:none;height:52vh;min-height:280px}
+  .side{order:2;overflow:visible}
+  .pane{overflow:visible}
+  .brand h1{font-size:14px}
+  .sep{display:none}
+  .doc-meta{order:5;width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.sw:hover,.pk-grid button:hover{transform:none}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="brand-mark" aria-hidden="true"></div><h1>Zona <span>Green</span> Studio</h1></div>
+    <div class="doc-meta"><b id="metaName">Sample</b><span class="code" id="metaCode">SVG-00000</span><span id="metaDirty"></span></div>
+    <div class="sp"></div>
+    <div class="grp">
+      <button class="btn icon" id="undoBtn" title="Urungkan (Ctrl+Z)" aria-label="Urungkan"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+      <button class="btn icon" id="redoBtn" title="Ulangi (Ctrl+Shift+Z)" aria-label="Ulangi"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+    </div>
+    <div class="sep"></div>
+    <div class="grp">
+      <button class="btn" id="openBtn"><svg viewBox="0 0 24 24"><path d="M12 15V3m0 0L7 8m5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>Buka SVG</button>
+      <button class="btn" id="bgBtn" title="Warna latar belakang"><span class="bg-dot" id="bgDot"></span>Latar</button>
+    </div>
+    <div class="sep"></div>
+    <div class="grp">
+      <button class="btn ghost" id="resetBtn">Reset</button>
+      <button class="btn" id="saveBtn"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg>Simpan</button>
+      <button class="btn primary" id="exportBtn"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export</button>
+    </div>
+  </header>
+
+  <aside class="side">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-warna" aria-selected="true" data-pane="warna">Warna</button>
+      <button class="tab" role="tab" id="tab-logo" aria-selected="false" data-pane="logo">Logo</button>
+      <button class="tab" role="tab" id="tab-pustaka" aria-selected="false" data-pane="pustaka">Pustaka</button>
+    </div>
+
+    <div class="pane" id="pane-warna">
+      <div class="sec" id="selSec" hidden>
+        <div class="selbox">
+          <div class="lbl">Bagian terpilih <span class="code" id="selId">p1</span></div>
+          <div class="selrow">
+            <div class="pair" id="selFillWrap">Isi <button class="sw" id="selFill" aria-label="Ubah warna isi bagian terpilih"></button></div>
+            <div class="pair" id="selStrokeWrap">Garis <button class="sw" id="selStroke" aria-label="Ubah warna garis bagian terpilih"></button></div>
+          </div>
+          <div class="lbl">Warna terpakai <span>klik untuk mengisi bagian ini</span></div>
+          <div class="sws mini" id="selUsed"></div>
+          <div class="row">
+            <button class="btn sm" id="selSame">Warnai semua yang sewarna</button>
+            <button class="btn sm" id="selLogo">Tempel logo di sini</button>
+            <button class="btn sm ghost" id="selClear">Batal pilih</button>
+          </div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="lbl">Warna isi <span id="fillCount"></span></div>
+        <div class="sws" id="fillSws"></div>
+      </div>
+      <div class="sec">
+        <div class="lbl">Warna garis <span id="strokeCount"></span></div>
+        <div class="sws" id="strokeSws"></div>
+      </div>
+      <div class="sec">
+        <div class="lbl">Latar belakang</div>
+        <div class="sws" id="bgSws"></div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-logo" hidden>
+      <div class="sec">
+        <div class="lbl">Tempel gambar</div>
+        <div class="field">
+          <label for="logoTarget">Tempel di</label>
+          <select class="inp" id="logoTarget">
+            <option value="sel">Bagian yang dipilih di kanvas</option>
+            <option value="all">Seluruh desain (di dalam garis luar)</option>
+          </select>
+        </div>
+        <div class="drop" id="logoDrop" role="button" tabindex="0">
+          <strong>Pilih logo PNG / JPG</strong>
+          <span class="hint">atau seret file gambar ke sini</span>
+        </div>
+        <p class="hint">Bagian logo yang keluar dari garis akan terpotong otomatis. Seret logo di kanvas untuk memindahkan, tarik titik sudut untuk mengubah ukuran.</p>
+      </div>
+      <div class="sec" id="logoEdit" hidden>
+        <div class="lbl">Logo terpilih <span id="logoTargetLbl"></span></div>
+        <div class="range"><label for="lgSize">Ukuran</label><input type="range" id="lgSize" min="2" max="150" step="0.5"><output id="lgSizeO"></output></div>
+        <div class="range"><label for="lgRot">Putar</label><input type="range" id="lgRot" min="-180" max="180" step="1"><output id="lgRotO"></output></div>
+        <div class="range"><label for="lgOp">Opasitas</label><input type="range" id="lgOp" min="10" max="100" step="1"><output id="lgOpO"></output></div>
+        <div class="row">
+          <button class="btn sm" id="lgCenter">Tengahkan</button>
+          <button class="btn sm" id="lgRetarget">Pindah ke bagian terpilih</button>
+          <button class="btn sm" id="lgAll">Seluruh desain</button>
+          <button class="btn sm danger" id="lgDel">Hapus</button>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="lbl">Gambar di desain <span id="logoCount"></span></div>
+        <div class="logos" id="logoList"></div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-pustaka" hidden>
+      <div class="sec">
+        <div class="lbl">Simpan desain ini</div>
+        <div class="field"><label for="libName">Nama</label><input class="inp" id="libName" maxlength="80"></div>
+        <div class="row" style="align-items:flex-end">
+          <div class="field"><label for="libCode">Kode</label><input class="inp mono" id="libCode" maxlength="24"></div>
+          <button class="btn" id="newCodeBtn" title="Buat kode baru">Kode baru</button>
+        </div>
+        <button class="btn primary" id="libSave" style="justify-content:center">Simpan ke pustaka</button>
+        <p class="hint" id="libNote">Disimpan di penyimpanan browser perangkat ini.</p>
+      </div>
+      <div class="sec">
+        <div class="lbl">Desain tersimpan <span id="libCount"></span></div>
+        <input class="inp" id="libSearch" placeholder="Cari nama atau kode, Enter untuk membuka" autocomplete="off">
+        <div class="lib" id="libList"></div>
+      </div>
+      <div class="sec">
+        <div class="lbl">Cadangan</div>
+        <div class="row">
+          <button class="btn sm" id="backupBtn">Unduh cadangan (.json)</button>
+          <button class="btn sm" id="restoreBtn">Pulihkan dari file</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="work">
+    <div class="board" id="board">
+      <div id="stage"><div id="zoomer"></div></div>
+      <div class="zoombar">
+        <button class="btn icon sm" id="zOut" title="Perkecil (−)" aria-label="Perkecil"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+        <button class="btn sm ghost" id="zPct" title="Kembalikan ukuran pas (0)">100%</button>
+        <button class="btn icon sm" id="zIn" title="Perbesar (+)" aria-label="Perbesar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button class="btn sm ghost" id="zFit" title="Pas di layar">Pas</button>
+      </div>
+    </div>
+    <div class="dock off" id="dock">
+      <div class="dock-head">
+        <button class="btn dock-cur" id="dockCur"><i id="dockCurSw"></i>Warna lain</button>
+        <div class="seg" role="group" aria-label="Yang diwarnai"><button id="dkFill" aria-pressed="true">Isi</button><button id="dkStroke" aria-pressed="false">Garis</button></div>
+        <div class="dock-used" id="dockUsedTop"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="pop" id="picker" hidden>
+  <div class="pk-sv" id="pkSv" aria-label="Geser untuk memilih kecerahan dan kepekatan warna"><div class="pk-th" id="pkTh"></div></div>
+  <input type="range" class="pk-hue" id="pkHue" min="0" max="360" step="1" aria-label="Geser untuk memilih rona warna">
+  <div class="pk-row">
+    <div class="pk-prev" id="pkPrev"></div>
+    <input class="inp mono" id="pkHex" maxlength="7" aria-label="Kode warna hex">
+    <button class="btn sm primary" id="pkDone">Pakai</button>
+  </div>
+  <div class="pk-lbl" id="pkUsedLbl">Warna terpakai</div>
+  <div class="pk-grid" id="pkUsed"></div>
+  <div class="pk-lbl">Pilihan warna</div>
+  <div class="pk-grid" id="pkGrid"></div>
+</div>
+
+<div class="pop" id="exportPop" hidden>
+  <div class="lbl">Export gambar</div>
+  <div class="field"><label for="exRes">Resolusi (sisi terpanjang)</label>
+    <select class="inp" id="exRes"><option value="1080">1080 px</option><option value="2048" selected>2048 px</option><option value="4096">4096 px</option></select></div>
+  <div class="field"><label for="exQ">Kualitas JPG</label>
+    <select class="inp" id="exQ"><option value="0.95">Tinggi</option><option value="0.85" selected>Sedang</option><option value="0.7">Ringan</option></select></div>
+  <p class="hint">Ruang kosong di sekitar gambar dipotong otomatis, jadi hanya gambar utama yang tersimpan.</p>
+  <div class="range"><label for="exMargin">Margin</label><input type="range" id="exMargin" min="0" max="25" value="3"><output id="exMarginO">3%</output></div>
+  <button class="btn primary" id="exJpg" style="justify-content:center">Unduh JPG</button>
+  <button class="btn" id="exSvg" style="justify-content:center">Unduh SVG</button>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-box">
+    <div class="lbl" id="modalTitle">Hasil export</div>
+    <p class="hint" id="modalText"></p>
+    <img id="modalImg" alt="Hasil desain">
+    <button class="btn" id="modalClose" style="align-self:flex-end">Tutup</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<input type="file" id="svgFile" accept=".svg,image/svg+xml" hidden>
+<input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp" hidden>
+<input type="file" id="restoreFile" accept=".json,application/json" hidden>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg', XL = 'http://www.w3.org/1999/xlink';
+const PARTS = new Set(['path','rect','circle','ellipse','polygon','polyline','line','text']);
+const SKIP = new Set(['defs','clippath','mask','pattern','symbol','marker','lineargradient','radialgradient','filter']);
+const stage = $('#stage'), board = $('#board'), zoomer = $('#zoomer');
+
+let svg = null, selPart = null, selLogo = null;
+let hist = [], hi = -1, original = '', dirty = false;
+let bg = '#D8E9D7';
+let meta = { name: 'Sample', code: genCode() };
+
+/* ---------- util ---------- */
+function genCode(){ const a = new Uint8Array(4); crypto.getRandomValues(a); return 'SVG-' + [...a].map(n => n.toString(36).slice(-1)).join('').toUpperCase() + (Date.now() % 36).toString(36).toUpperCase(); }
+const cx2d = document.createElement('canvas').getContext('2d');
+function toHex(c){
+  if (!c || c === 'none' || c.startsWith('url')) return null;
+  cx2d.fillStyle = '#000'; cx2d.fillStyle = c; const v = cx2d.fillStyle;
+  if (v.startsWith('#')) return v;
+  const m = v.match(/[\d.]+/g); if (!m) return null;
+  if (m[3] !== undefined && +m[3] === 0) return null;
+  return '#' + m.slice(0,3).map(n => Math.round(+n).toString(16).padStart(2,'0')).join('');
+}
+function lum(h){ const n = parseInt(h.slice(1),16); return (0.2126*(n>>16&255) + 0.7152*(n>>8&255) + 0.0722*(n&255)) / 255; }
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+function slug(s){ return (s || 'desain').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) || 'desain'; }
+function mstr(m){ return `matrix(${[m.a,m.b,m.c,m.d,m.e,m.f].map(n => +n.toFixed(5)).join(' ')})`; }
+function rootM(el){ return svg.getScreenCTM().inverse().multiply(el.getScreenCTM()); }
+function toRoot(x, y){ return new DOMPoint(x, y).matrixTransform(svg.getScreenCTM().inverse()); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+/* ---------- parts ---------- */
+function isPart(el){
+  if (!PARTS.has(el.localName)) return false;
+  for (let p = el.parentNode; p && p !== svg; p = p.parentNode){
+    if (SKIP.has((p.localName || '').toLowerCase())) return false;
+    if (p.id === '__ui' || (p.classList && p.classList.contains('__logo'))) return false;
+  }
+  return true;
+}
+function parts(){ return [...svg.getElementsByTagName('*')].filter(isPart); }
+function fillOf(el){ return el.style.fill || getComputedStyle(el).fill; }
+function strokeOf(el){ return el.style.stroke || getComputedStyle(el).stroke; }
+function hasFill(el){ const f = fillOf(el); return !!(toHex(f) || (f && f.startsWith('url'))); }
+
+/* ---------- load ---------- */
+/* beri awalan unik pada class di tiap <style> agar SVG bersarang (mis. ekspor CorelDRAW) tidak saling menimpa */
+function scopeStyles(r){
+  [...r.getElementsByTagName('style')].forEach((st, i) => {
+    let scope = st.parentNode;
+    while (scope && scope !== r && scope.localName !== 'svg') scope = scope.parentNode;
+    scope = scope || r;
+    const pre = 'z' + i + '-', names = new Set();
+    st.textContent = st.textContent.replace(/\.(-?[_a-zA-Z][\w-]*)/g, (m, n) => { names.add(n); return '.' + pre + n; });
+    [scope, ...scope.querySelectorAll('[class]')].forEach(el => {
+      const c = el.getAttribute('class'); if (!c) return;
+      el.setAttribute('class', c.split(/\s+/).map(n => names.has(n) ? pre + n : n).join(' '));
+    });
+  });
+}
+function sanitize(r){
+  r.querySelectorAll('script,foreignObject,iframe,object,embed,audio,video').forEach(n => n.remove());
+  [r, ...r.querySelectorAll('*')].forEach(el => {
+    [...el.attributes].forEach(a => {
+      const n = a.name.toLowerCase();
+      if (n.startsWith('on')) el.removeAttribute(a.name);
+      else if ((n === 'href' || n === 'xlink:href') && !/^(#|data:image\/(png|jpe?g|gif|webp);)/i.test(a.value.trim())) el.removeAttribute(a.name);
+    });
+  });
+}
+const FREEZE = ['fill','fill-opacity','fill-rule','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-miterlimit','stroke-dasharray','opacity'];
+const FREEZE_TEXT = ['font-family','font-size','font-weight','font-style','text-anchor'];
+function freeze(){
+  const all = parts();
+  const stops = [...svg.getElementsByTagName('stop')];
+  const vals = all.map(el => {
+    const cs = getComputedStyle(el), o = {};
+    FREEZE.forEach(p => o[p] = cs.getPropertyValue(p));
+    if (el.localName === 'text') FREEZE_TEXT.forEach(p => o[p] = cs.getPropertyValue(p));
+    o.display = cs.display;
+    return o;
+  });
+  const sv = stops.map(s => { const cs = getComputedStyle(s); return [cs.getPropertyValue('stop-color'), cs.getPropertyValue('stop-opacity')]; });
+  all.forEach((el, i) => {
+    const o = vals[i];
+    for (const [p, v] of Object.entries(o)){
+      if (!v) continue;
+      if (p === 'display'){ if (v === 'none') el.style.display = 'none'; continue; }
+      if (p === 'opacity' && v === '1') continue;
+      if (p.startsWith('stroke-') && (o.stroke === 'none')) continue;
+      el.style.setProperty(p, v);
+    }
+    const h = toHex(o.fill); if (h) el.setAttribute('data-of', h);
+  });
+  stops.forEach((s, i) => { s.style.setProperty('stop-color', sv[i][0]); s.style.setProperty('stop-opacity', sv[i][1]); });
+  svg.querySelectorAll('style').forEach(s => s.remove());
+}
+function assignIds(){
+  let n = 0;
+  svg.querySelectorAll('[data-part]').forEach(el => { n = Math.max(n, parseInt(el.dataset.part.slice(1)) || 0); });
+  parts().forEach(el => { if (!el.dataset.part) el.dataset.part = 'p' + (++n); });
+}
+function mount(el){
+  svg = el;
+  zoomer.replaceChildren(el);
+  let defs = svg.querySelector('#__defs');
+  if (!defs){ defs = document.createElementNS(NS, 'defs'); defs.id = '__defs'; svg.prepend(defs); }
+  let ui = svg.querySelector('#__ui');
+  if (!ui){ ui = document.createElementNS(NS, 'g'); ui.id = '__ui'; }
+  svg.append(ui);
+}
+function loadSVG(text, { fresh = false } = {}){
+  const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+  const r = doc.documentElement;
+  if (doc.getElementsByTagName('parsererror').length || r.localName !== 'svg') throw new Error('File ini bukan SVG yang valid.');
+  sanitize(r);
+  const el = document.importNode(r, true);
+  const first = !el.hasAttribute('data-studio');
+  if (first) scopeStyles(el);
+  let needBox = false;
+  if (first){
+    if (!el.getAttribute('viewBox')){
+      const w = parseFloat(el.getAttribute('width')), h = parseFloat(el.getAttribute('height'));
+      if (w && h) el.setAttribute('viewBox', `0 0 ${w} ${h}`); else needBox = true;
+    }
+    el.removeAttribute('width'); el.removeAttribute('height');
+    el.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  }
+  mount(el);
+  if (first){
+    if (needBox){ const b = svg.getBBox(); svg.setAttribute('viewBox', `${b.x} ${b.y} ${b.width || 100} ${b.height || 100}`); }
+    freeze(); assignIds(); svg.setAttribute('data-studio', '1');
+  }
+  selPart = null; selLogo = null;
+  if (fresh){ original = snapshot(); hist = []; hi = -1; }
+  refresh();
+}
+
+/* ---------- history ---------- */
+function snapshot(){
+  const c = svg.cloneNode(true);
+  const ui = c.querySelector('#__ui'); if (ui) ui.replaceChildren();
+  return new XMLSerializer().serializeToString(c);
+}
+function commit(){
+  hist = hist.slice(0, hi + 1); hist.push(snapshot());
+  if (hist.length > 40) hist.shift();
+  hi = hist.length - 1; setDirty(true); updUndo();
+}
+function restore(s){
+  const keepLogo = selLogo && selLogo.dataset.logo, keepPart = selPart && selPart.dataset.part;
+  loadSVG(s);
+  if (keepPart) selPart = svg.querySelector(`[data-part="${keepPart}"]`);
+  if (keepLogo) selLogo = svg.querySelector(`[data-logo="${keepLogo}"]`);
+  refresh();
+}
+function undo(){ if (hi > 0){ hi--; restore(hist[hi]); setDirty(true); updUndo(); } }
+function redo(){ if (hi < hist.length - 1){ hi++; restore(hist[hi]); setDirty(true); updUndo(); } }
+function updUndo(){ $('#undoBtn').disabled = hi <= 0; $('#redoBtn').disabled = hi >= hist.length - 1; }
+function setDirty(d){ dirty = d; $('#metaDirty').textContent = d ? '· belum disimpan' : ''; }
+
+/* ---------- render panels ---------- */
+function refresh(){ renderColors(); renderSel(); renderLogos(); drawUI(); renderMeta(); }
+function renderMeta(){ $('#metaName').textContent = meta.name || 'Tanpa nama'; $('#metaCode').textContent = meta.code; if (document.activeElement !== $('#libName')) $('#libName').value = meta.name || ''; if (document.activeElement !== $('#libCode')) $('#libCode').value = meta.code; updSaveLabel(); }
+function groupBy(get){
+  const m = new Map();
+  for (const el of parts()){ if (el.style.display === 'none') continue; const h = toHex(get(el)); if (!h) continue; if (!m.has(h)) m.set(h, []); m.get(h).push(el); }
+  return [...m.entries()].sort((a, b) => b[1].length - a[1].length);
+}
+function swatchList(box, groups, prop){
+  box.replaceChildren();
+  const MAX = 48;
+  groups.slice(0, MAX).forEach(([hex, els]) => {
+    const b = document.createElement('button');
+    b.className = 'sw'; b.style.background = hex; b.title = `${hex} · ${els.length} bagian`;
+    b.setAttribute('aria-label', `Ubah warna ${hex}, ${els.length} bagian`);
+    if (els.length > 1){ const n = document.createElement('span'); n.className = 'n'; n.textContent = els.length; b.append(n); }
+    b.onclick = () => openPicker(b, hex, h => { els.forEach(el => el.style[prop] = h); b.style.background = h; }, () => { commit(); refresh(); });
+    box.append(b);
+  });
+  if (groups.length > MAX){ const s = document.createElement('span'); s.className = 'more'; s.textContent = `+${groups.length - MAX} warna lain`; box.append(s); }
+  if (!groups.length){ const s = document.createElement('span'); s.className = 'hint'; s.textContent = 'Tidak ada'; box.append(s); }
+}
+function renderColors(){
+  const f = groupBy(fillOf), s = groupBy(strokeOf);
+  swatchList($('#fillSws'), f, 'fill'); swatchList($('#strokeSws'), s, 'stroke');
+  $('#fillCount').textContent = f.length + ' warna'; $('#strokeCount').textContent = s.length + ' warna';
+}
+function renderSel(){
+  const on = !!(selPart && selPart.isConnected);
+  $('#selSec').hidden = !on;
+  renderDock();
+  const tgt = $('#logoTarget'); tgt.options[0].disabled = !on; if (!on && tgt.value === 'sel') tgt.value = 'all'; if (on) tgt.value = 'sel';
+  $('#lgRetarget').disabled = !on;
+  if (!on) return;
+  $('#selId').textContent = selPart.dataset.part;
+  const fh = toHex(fillOf(selPart)), sh = toHex(strokeOf(selPart));
+  $('#selFill').style.background = fh || 'repeating-linear-gradient(45deg,#ccc 0 3px,#fff 3px 6px)';
+  $('#selStrokeWrap').hidden = !sh;
+  if (sh) $('#selStroke').style.background = sh;
+  $('#selSame').disabled = !fh;
+  const ub = $('#selUsed'); ub.replaceChildren();
+  usedColors().forEach(c => {
+    const b = document.createElement('button'); b.className = 'sw'; b.style.background = c; b.title = c;
+    b.setAttribute('aria-label', 'Isi bagian terpilih dengan ' + c);
+    b.onclick = () => { const el = selPart; if (!el) return; el.style.fill = c; addRecent(c); commit(); refresh(); };
+    ub.append(b);
+  });
+}
+
+/* ---------- selection & overlay ---------- */
+function selectPart(el){ selPart = el; selLogo = null; renderSel(); renderLogos(); drawUI(); }
+function selectLogo(g){ selLogo = g; selPart = null; renderSel(); renderLogos(); drawUI(); }
+function clearSel(){ selPart = null; selLogo = null; renderSel(); renderLogos(); drawUI(); }
+function drawUI(){
+  if (!svg) return;
+  const ui = svg.querySelector('#__ui'); ui.replaceChildren(); svg.append(ui);
+  const ctm = svg.getScreenCTM(); if (!ctm) return;
+  const px = 1 / Math.hypot(ctm.a, ctm.b);
+  if (selPart && selPart.isConnected){
+    const m = mstr(rootM(selPart));
+    [['#ffffff', 5, ''], ['#3D963C', 2, '6 4']].forEach(([c, w, d]) => {
+      const k = selPart.cloneNode(true); k.removeAttribute('data-part'); k.removeAttribute('id');
+      k.setAttribute('transform', m);
+      k.setAttribute('style', `fill:none;stroke:${c};stroke-width:${w};vector-effect:non-scaling-stroke;pointer-events:none;${d ? 'stroke-dasharray:' + d : ''}`);
+      ui.append(k);
+    });
+  }
+  if (selLogo && selLogo.isConnected){
+    const d = selLogo.dataset, w = +d.w, h = w * +d.ar, cx = +d.cx, cy = +d.cy, rot = +d.rot;
+    const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `rotate(${rot} ${cx} ${cy})`);
+    const r = document.createElementNS(NS, 'rect');
+    Object.entries({ x: cx - w/2, y: cy - h/2, width: w, height: h, 'data-ui': 'move' }).forEach(([k, v]) => r.setAttribute(k, v));
+    r.setAttribute('style', 'fill:rgba(61,150,60,0.05);stroke:#3D963C;stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;cursor:move');
+    const hd = document.createElementNS(NS, 'circle');
+    Object.entries({ cx: cx + w/2, cy: cy + h/2, r: 8 * px, 'data-ui': 'scale' }).forEach(([k, v]) => hd.setAttribute(k, v));
+    hd.setAttribute('style', 'fill:#ffffff;stroke:#3D963C;stroke-width:2;vector-effect:non-scaling-stroke;cursor:nwse-resize');
+    g.append(r, hd); ui.append(g);
+  }
+}
+
+/* ---------- logos ---------- */
+function partBox(el){
+  const b = el.getBBox(), m = rootM(el);
+  const p = [[b.x, b.y], [b.x + b.width, b.y], [b.x, b.y + b.height], [b.x + b.width, b.y + b.height]].map(([x, y]) => new DOMPoint(x, y).matrixTransform(m));
+  const xs = p.map(q => q.x), ys = p.map(q => q.y);
+  return { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
+}
+function vbBox(){ const v = svg.viewBox.baseVal; return { x: v.x, y: v.y, w: v.width, h: v.height }; }
+function targetEl(t){ return t && t !== 'all' ? svg.querySelector(`[data-part="${t}"]`) : null; }
+function buildClip(id, target){
+  svg.querySelector(`#clip-${id}`)?.remove();
+  const cp = document.createElementNS(NS, 'clipPath'); cp.id = 'clip-' + id;
+  const te = targetEl(target);
+  let list = te ? [te] : parts().filter(el => el.style.display !== 'none' && hasFill(el));
+  if (!list.length) list = parts();
+  list.forEach(el => {
+    const c = el.cloneNode(true);
+    c.removeAttribute('data-part'); c.removeAttribute('id'); c.removeAttribute('data-of');
+    const rule = el.style.fillRule || getComputedStyle(el).fillRule || 'nonzero';
+    c.setAttribute('style', `clip-rule:${rule}`);
+    c.setAttribute('transform', mstr(rootM(el)));
+    cp.append(c);
+  });
+  svg.querySelector('#__defs').append(cp);
+}
+function placeGroup(g){
+  const te = targetEl(g.dataset.target);
+  if (te){ te.after(g); g.setAttribute('transform', mstr(rootM(te.parentNode).inverse())); }
+  else { svg.insertBefore(g, svg.querySelector('#__ui')); g.removeAttribute('transform'); }
+}
+function updateLogo(g){
+  const d = g.dataset, w = +d.w, h = w * +d.ar, cx = +d.cx, cy = +d.cy;
+  const img = g.querySelector('image');
+  img.setAttribute('x', cx - w/2); img.setAttribute('y', cy - h/2);
+  img.setAttribute('width', w); img.setAttribute('height', h);
+  img.setAttribute('transform', `rotate(${+d.rot} ${cx} ${cy})`);
+  img.setAttribute('opacity', d.op);
+}
+function addLogo(href, nw, nh, target, silent){
+  const id = 'L' + uid();
+  const g = document.createElementNS(NS, 'g');
+  g.setAttribute('class', '__logo');
+  const te = targetEl(target);
+  const box = te ? partBox(te) : vbBox();
+  const ar = nh / nw;
+  const w = Math.min(box.w * 0.5, (box.h * 0.5) / ar);
+  Object.assign(g.dataset, { logo: id, target: te ? target : 'all', ar, rot: 0, op: 1, w, cx: box.x + box.w / 2, cy: box.y + box.h * (te ? 0.4 : 0.5) });
+  g.setAttribute('clip-path', `url(#clip-${id})`);
+  const img = document.createElementNS(NS, 'image');
+  img.setAttribute('href', href); img.setAttributeNS(XL, 'xlink:href', href);
+  img.setAttribute('preserveAspectRatio', 'none');
+  g.append(img);
+  buildClip(id, g.dataset.target); placeGroup(g); updateLogo(g);
+  selectLogo(g);
+  if (!silent) commit();
+  return g;
+}
+function retarget(g, target){
+  g.dataset.target = target;
+  buildClip(g.dataset.logo, target); placeGroup(g); updateLogo(g); commit(); renderLogos(); drawUI();
+}
+function deleteLogo(g){ svg.querySelector(`#clip-${g.dataset.logo}`)?.remove(); g.remove(); if (selLogo === g) selLogo = null; commit(); refresh(); }
+function renderLogos(){
+  const list = $('#logoList'); list.replaceChildren();
+  const logos = svg ? [...svg.querySelectorAll('.__logo')] : [];
+  $('#logoCount').textContent = logos.length ? logos.length + ' gambar' : '';
+  if (!logos.length){ const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Belum ada gambar yang ditempel.'; list.append(e); }
+  logos.forEach((g, i) => {
+    const it = document.createElement('div'); it.className = 'logo-it' + (g === selLogo ? ' on' : '');
+    const im = document.createElement('img'); im.alt = ''; im.src = g.querySelector('image').getAttribute('href');
+    const t = document.createElement('div'); t.className = 't';
+    t.textContent = 'Gambar ' + (i + 1);
+    const sm = document.createElement('small'); sm.textContent = g.dataset.target === 'all' ? 'Seluruh desain' : 'Bagian ' + g.dataset.target; t.append(sm);
+    const del = document.createElement('button'); del.className = 'btn sm ghost danger'; del.textContent = 'Hapus';
+    del.onclick = e => { e.stopPropagation(); deleteLogo(g); };
+    it.append(im, t, del); it.onclick = () => selectLogo(g);
+    list.append(it);
+  });
+  const ed = $('#logoEdit'); ed.hidden = !selLogo;
+  if (selLogo){
+    const d = selLogo.dataset, vw = vbBox().w;
+    setRange('lgSize', +d.w / vw * 100, v => v.toFixed(0) + '%');
+    setRange('lgRot', +d.rot, v => v.toFixed(0) + '°');
+    setRange('lgOp', +d.op * 100, v => v.toFixed(0) + '%');
+    $('#logoTargetLbl').textContent = d.target === 'all' ? 'seluruh desain' : 'di ' + d.target;
+  }
+}
+function setRange(id, v, fmt){ const r = $('#' + id); r.value = v; $('#' + id + 'O').textContent = fmt(+r.value); r._fmt = fmt; }
+[['lgSize', (g, v) => g.dataset.w = v / 100 * vbBox().w], ['lgRot', (g, v) => g.dataset.rot = v], ['lgOp', (g, v) => g.dataset.op = v / 100]].forEach(([id, fn]) => {
+  const r = $('#' + id);
+  r.addEventListener('input', () => { if (!selLogo) return; fn(selLogo, +r.value); updateLogo(selLogo); drawUI(); $('#' + id + 'O').textContent = r._fmt(+r.value); });
+  r.addEventListener('change', () => selLogo && commit());
+});
+$('#lgCenter').onclick = () => { if (!selLogo) return; const te = targetEl(selLogo.dataset.target); const b = te ? partBox(te) : vbBox(); selLogo.dataset.cx = b.x + b.w/2; selLogo.dataset.cy = b.y + b.h/2; updateLogo(selLogo); drawUI(); commit(); };
+$('#lgDel').onclick = () => selLogo && deleteLogo(selLogo);
+$('#lgAll').onclick = () => selLogo && retarget(selLogo, 'all');
+let lastPart = null;
+$('#lgRetarget').onclick = () => { if (selLogo && lastPart && lastPart.isConnected) retarget(selLogo, lastPart.dataset.part); };
+
+function readLogoFile(file){
+  if (!file || !/^image\/(png|jpeg|webp)$/.test(file.type)){ toast('Gunakan file PNG, JPG atau WebP.'); return; }
+  const fr = new FileReader();
+  fr.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      let w = im.naturalWidth, h = im.naturalHeight, src = fr.result;
+      const MAX = 1400;
+      if (Math.max(w, h) > MAX){
+        const s = MAX / Math.max(w, h); const c = document.createElement('canvas');
+        c.width = Math.round(w * s); c.height = Math.round(h * s);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        src = c.toDataURL(file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png', 0.92); w = c.width; h = c.height;
+      }
+      const useSel = $('#logoTarget').value === 'sel' && lastPart && lastPart.isConnected;
+      addLogo(src, w, h, useSel ? lastPart.dataset.part : 'all');
+      switchTab('logo'); toast('Gambar ditempel. Seret untuk mengatur posisi.');
+    };
+    im.onerror = () => toast('Gambar tidak bisa dibaca.');
+    im.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+$('#logoDrop').onclick = () => $('#logoFile').click();
+$('#logoDrop').onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $('#logoFile').click(); } };
+$('#logoFile').onchange = e => { readLogoFile(e.target.files[0]); e.target.value = ''; };
+['dragover', 'dragleave', 'drop'].forEach(ev => $('#logoDrop').addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); if (ev === 'drop') readLogoFile(e.dataTransfer.files[0]); }));
+
+/* ---------- canvas interaction ---------- */
+/* zoom & geser */
+const Z = { z: 1, x: 0, y: 0 };
+const ZMIN = 0.5, ZMAX = 16;
+function applyZoom(){
+  zoomer.style.transform = `translate(${Z.x}px,${Z.y}px) scale(${Z.z})`;
+  $('#zPct').textContent = Math.round(Z.z * 100) + '%';
+  drawUI();
+}
+function zOrigin(){ const r = stage.getBoundingClientRect(), cs = getComputedStyle(stage); return { x: r.left + parseFloat(cs.paddingLeft), y: r.top + parseFloat(cs.paddingTop) }; }
+function zoomAt(nz, cx, cy){
+  nz = Math.min(ZMAX, Math.max(ZMIN, nz));
+  const o = zOrigin(), px = cx - o.x, py = cy - o.y;
+  Z.x = px - (px - Z.x) * nz / Z.z; Z.y = py - (py - Z.y) * nz / Z.z; Z.z = nz;
+  applyZoom();
+}
+function zoomCenter(f){ const r = stage.getBoundingClientRect(); zoomAt(Z.z * f, r.left + r.width / 2, r.top + r.height / 2); }
+function fitZoom(){ Z.z = 1; Z.x = 0; Z.y = 0; applyZoom(); }
+stage.addEventListener('wheel', e => {
+  e.preventDefault();
+  const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1);
+  zoomAt(Z.z * Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0018)), e.clientX, e.clientY);
+}, { passive: false });
+$('#zIn').onclick = () => zoomCenter(1.35);
+$('#zOut').onclick = () => zoomCenter(1 / 1.35);
+$('#zPct').onclick = fitZoom; $('#zFit').onclick = fitZoom;
+
+let drag = null, pending = null, pinch = null;
+const ptrs = new Map();
+const mid = () => { const [a, b] = [...ptrs.values()]; return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, d: Math.hypot(a.x - b.x, a.y - b.y) || 1 }; };
+stage.addEventListener('pointerdown', e => {
+  if (!svg) return;
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+  e.preventDefault();
+  if (ptrs.size === 2){
+    if (drag && drag.moved) commit();
+    drag = null; pending = null;
+    const m = mid(); pinch = { ...m, z: Z.z, zx: Z.x, zy: Z.y };
+    return;
+  }
+  if (ptrs.size > 2 || pinch) return;
+  const t = e.target;
+  const ui = t.closest && t.closest('[data-ui]');
+  const lg = t.closest && t.closest('.__logo');
+  if ((ui || lg) && (selLogo || lg)){
+    if (lg && lg !== selLogo) selectLogo(lg);
+    const p = toRoot(e.clientX, e.clientY), d = selLogo.dataset;
+    drag = { mode: ui ? ui.dataset.ui : 'move', sx: p.x, sy: p.y, cx: +d.cx, cy: +d.cy, w: +d.w, moved: false };
+    return;
+  }
+  const part = t.closest && t.closest('[data-part]');
+  pending = { part: part && isPart(part) ? part : null, sx: e.clientX, sy: e.clientY, zx: Z.x, zy: Z.y, panning: false };
+});
+stage.addEventListener('pointermove', e => {
+  if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinch && ptrs.size >= 2){
+    const m = mid(), nz = Math.min(ZMAX, Math.max(ZMIN, pinch.z * m.d / pinch.d));
+    const o = zOrigin(), px = pinch.x - o.x, py = pinch.y - o.y;
+    Z.x = px - (px - pinch.zx) * nz / pinch.z + (m.x - pinch.x);
+    Z.y = py - (py - pinch.zy) * nz / pinch.z + (m.y - pinch.y);
+    Z.z = nz; applyZoom(); return;
+  }
+  if (pending){
+    const dx = e.clientX - pending.sx, dy = e.clientY - pending.sy;
+    if (!pending.panning && Math.hypot(dx, dy) > 6){ pending.panning = true; stage.style.cursor = 'grabbing'; }
+    if (pending.panning){ Z.x = pending.zx + dx; Z.y = pending.zy + dy; applyZoom(); }
+    return;
+  }
+  if (!drag || !selLogo) return;
+  const p = toRoot(e.clientX, e.clientY), d = selLogo.dataset;
+  if (drag.mode === 'move'){ d.cx = drag.cx + p.x - drag.sx; d.cy = drag.cy + p.y - drag.sy; }
+  else {
+    const r0 = Math.hypot(drag.sx - drag.cx, drag.sy - drag.cy) || 1, r1 = Math.hypot(p.x - drag.cx, p.y - drag.cy);
+    d.w = Math.max(vbBox().w * 0.01, drag.w * r1 / r0);
+  }
+  drag.moved = true; updateLogo(selLogo); drawUI();
+});
+const endPtr = e => {
+  ptrs.delete(e.pointerId);
+  stage.style.cursor = '';
+  if (pinch){ if (!ptrs.size) pinch = null; return; }
+  if (drag){ if (drag.moved){ commit(); renderLogos(); } drag = null; return; }
+  if (pending && !pending.panning && e.type === 'pointerup'){
+    if (pending.part){ lastPart = pending.part; selectPart(pending.part); } else clearSel();
+  }
+  pending = null;
+};
+stage.addEventListener('pointerup', endPtr); stage.addEventListener('pointercancel', endPtr);
+window.addEventListener('resize', () => drawUI());
+
+/* selected part panel */
+$('#selFill').onclick = () => { const el = selPart; if (!el) return; openPicker($('#selFill'), toHex(fillOf(el)) || '#ffffff', h => { el.style.fill = h; $('#selFill').style.background = h; }, () => { commit(); refresh(); }); };
+$('#selStroke').onclick = () => { const el = selPart; if (!el) return; openPicker($('#selStroke'), toHex(strokeOf(el)) || '#000000', h => { el.style.stroke = h; $('#selStroke').style.background = h; }, () => { commit(); refresh(); }); };
+$('#selSame').onclick = () => {
+  const el = selPart; if (!el) return; const cur = toHex(fillOf(el));
+  const els = parts().filter(p => toHex(fillOf(p)) === cur);
+  openPicker($('#selSame'), cur, h => els.forEach(p => p.style.fill = h), () => { commit(); refresh(); });
+};
+$('#selLogo').onclick = () => { switchTab('logo'); $('#logoTarget').value = 'sel'; $('#logoFile').click(); };
+$('#selClear').onclick = clearSel;
+
+/* ---------- background ---------- */
+const BG_PRESETS = ['#ffffff', '#D8E9D7', '#C0DABF', '#88BD87', '#3D963C', '#245223', '#f4f1ea', '#1f2933', '#0b0f14', '#f6d55c'];
+function setBg(h){ bg = h; board.style.background = h; $('#bgDot').style.background = h; }
+BG_PRESETS.forEach(h => { const b = document.createElement('button'); b.className = 'sw sq'; b.style.background = h; b.title = h; b.setAttribute('aria-label', 'Latar ' + h); b.onclick = () => { setBg(h); setDirty(true); }; $('#bgSws').append(b); });
+$('#bgBtn').onclick = () => openPicker($('#bgBtn'), bg, setBg, () => setDirty(true));
+
+/* ---------- color picker ---------- */
+let pk = null, hsv = { h: 0, s: 0, v: 0 };
+let recent = [];
+try { recent = JSON.parse(localStorage.getItem('sws-recent') || '[]').filter(c => /^#[0-9a-f]{6}$/i.test(c)).slice(0, 12); } catch (e) {}
+function addRecent(h){ recent = [h, ...recent.filter(c => c !== h)].slice(0, 12); try { localStorage.setItem('sws-recent', JSON.stringify(recent)); } catch (e) {} }
+function usedColors(){
+  const out = [];
+  const add = c => { if (c && !out.includes(c)) out.push(c); };
+  recent.forEach(add);
+  if (svg){ groupBy(fillOf).forEach(g => add(g[0])); groupBy(strokeOf).forEach(g => add(g[0])); }
+  return out.slice(0, 24);
+}
+function hsv2hex(h, s, v){
+  const f = n => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); };
+  return '#' + [f(5), f(3), f(1)].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+}
+function hex2hsv(hex){
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0;
+  if (d){ if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; if (h < 0) h += 360; }
+  return { h, s: mx ? d / mx : 0, v: mx };
+}
+function swBtn(c, onClick){ const b = document.createElement('button'); b.style.background = c; b.title = c; b.setAttribute('aria-label', c); b.onclick = onClick; return b; }
+(() => {
+  const hues = [0, 18, 32, 45, 58, 85, 130, 165, 190, 212, 245, 285];
+  const rows = [[90, 85], [78, 80], [64, 75], [50, 75], [38, 70], [26, 65]];
+  rows.forEach(([l, s]) => hues.forEach(h => { const c = toHex(`hsl(${h},${s}%,${l}%)`); $('#pkGrid').append(swBtn(c, () => pkSet(c))); }));
+  for (let i = 0; i < 12; i++){ const v = Math.round(255 * i / 11), c = '#' + v.toString(16).padStart(2, '0').repeat(3); $('#pkGrid').append(swBtn(c, () => pkSet(c))); }
+})();
+function renderUsed(){
+  const box = $('#pkUsed'); box.replaceChildren();
+  const cols = usedColors();
+  cols.forEach(c => box.append(swBtn(c, () => pkSet(c))));
+  $('#pkUsedLbl').hidden = box.hidden = !cols.length;
+}
+function pkPaint(){
+  $('#pkSv').style.backgroundColor = `hsl(${hsv.h},100%,50%)`;
+  $('#pkTh').style.left = (hsv.s * 100) + '%'; $('#pkTh').style.top = ((1 - hsv.v) * 100) + '%';
+  $('#pkHue').value = hsv.h;
+}
+function pkSet(h, from){
+  if (!pk) return; h = toHex(h); if (!h) return;
+  pk.cur = h; pk.onLive(h); $('#pkPrev').style.background = h;
+  if (from !== 'hex') $('#pkHex').value = h;
+  if (from !== 'sv'){ const n = hex2hsv(h); if (n.s === 0 || n.v === 0) n.h = hsv.h; hsv = n; }
+  pkPaint();
+}
+const sv = $('#pkSv');
+function svFrom(e){
+  const r = sv.getBoundingClientRect(), cl = x => Math.min(1, Math.max(0, x));
+  hsv.s = cl((e.clientX - r.left) / r.width); hsv.v = 1 - cl((e.clientY - r.top) / r.height);
+  pkSet(hsv2hex(hsv.h, hsv.s, hsv.v), 'sv');
+}
+sv.addEventListener('pointerdown', e => { sv.setPointerCapture(e.pointerId); sv._drag = true; svFrom(e); e.preventDefault(); });
+sv.addEventListener('pointermove', e => { if (sv._drag) svFrom(e); });
+sv.addEventListener('pointerup', () => sv._drag = false);
+sv.addEventListener('pointercancel', () => sv._drag = false);
+$('#pkHue').addEventListener('input', e => { hsv.h = +e.target.value; pkSet(hsv2hex(hsv.h, hsv.s, hsv.v), 'sv'); });
+$('#pkDone').onclick = () => closePicker();
+function placePop(pop, anchor){
+  pop.hidden = false;
+  const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let x = Math.min(Math.max(8, r.left), innerWidth - pw - 8), y = r.bottom + 8;
+  if (y + ph > innerHeight - 8) y = Math.max(8, r.top - ph - 8);
+  pop.style.left = x + 'px'; pop.style.top = y + 'px';
+}
+function openPicker(anchor, hex, onLive, onCommit){
+  closePicker();
+  hex = toHex(hex) || '#000000';
+  pk = { start: hex, cur: hex, onLive, onCommit };
+  hsv = hex2hsv(hex);
+  $('#pkHex').value = hex; $('#pkPrev').style.background = hex;
+  renderUsed(); pkPaint();
+  placePop($('#picker'), anchor);
+}
+function closePicker(){
+  if (!pk) return; const p = pk; pk = null; $('#picker').hidden = true;
+  if (p.cur !== p.start){ addRecent(p.cur); p.onCommit(p.cur); }
+}
+$('#pkHex').addEventListener('input', e => { const v = e.target.value.trim(); if (/^#?[0-9a-f]{6}$/i.test(v)) pkSet(v.startsWith('#') ? v : '#' + v, true); });
+$('#pkHex').addEventListener('keydown', e => { if (e.key === 'Enter') closePicker(); });
+document.addEventListener('pointerdown', e => {
+  if (pk && !$('#picker').contains(e.target)) closePicker();
+  const ex = $('#exportPop'); if (!ex.hidden && !ex.contains(e.target) && !$('#exportBtn').contains(e.target)) ex.hidden = true;
+}, true);
+
+/* ---------- dock warna di bawah kanvas ---------- */
+let dockMode = 'fill';
+function dockColBtn(c){ const b = document.createElement('button'); b.className = 'c'; b.style.background = c; b.title = c; b.setAttribute('aria-label', 'Warnai dengan ' + c); b.onclick = () => dockApply(c); return b; }
+function dockApply(c){
+  const el = selPart;
+  if (!el || !el.isConnected){ toast('Ketuk bagian gambar dulu, lalu pilih warna.'); return; }
+  el.style[dockMode] = c; addRecent(c); commit(); refresh();
+}
+function renderDock(){
+  const on = !!(selPart && selPart.isConnected);
+  $('#dock').classList.toggle('off', !on);
+  const strokeOk = on && !!toHex(strokeOf(selPart));
+  if (on && dockMode === 'stroke' && !strokeOk) dockMode = 'fill';
+  $('#dkStroke').disabled = on && !strokeOk;
+  $('#dkFill').setAttribute('aria-pressed', dockMode === 'fill'); $('#dkStroke').setAttribute('aria-pressed', dockMode === 'stroke');
+  const cur = on ? toHex(dockMode === 'fill' ? fillOf(selPart) : strokeOf(selPart)) : null;
+  $('#dockCurSw').style.background = cur || '';
+  const used = usedColors();
+  ['#dockUsedTop'].forEach(id => { const box = $(id); box.replaceChildren(); used.forEach(c => box.append(dockColBtn(c))); });
+}
+$('#dkFill').onclick = () => { dockMode = 'fill'; renderDock(); };
+$('#dkStroke').onclick = () => { dockMode = 'stroke'; renderDock(); };
+$('#dockCur').onclick = () => {
+  const el = selPart;
+  if (!el || !el.isConnected){ toast('Ketuk bagian gambar dulu, lalu pilih warna.'); return; }
+  const prop = dockMode, cur = toHex(prop === 'fill' ? fillOf(el) : strokeOf(el)) || '#ffffff';
+  openPicker($('#dockCur'), cur, h => { el.style[prop] = h; $('#dockCurSw').style.background = h; }, () => { commit(); refresh(); });
+};
+
+/* ---------- tabs ---------- */
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.pane === name));
+  ['warna', 'logo', 'pustaka'].forEach(n => $('#pane-' + n).hidden = n !== name);
+  if (name === 'pustaka') renderLib();
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => switchTab(t.dataset.pane));
+
+/* ---------- open svg ---------- */
+function openSvgFile(file){
+  if (!file) return;
+  if (!/\.svg$/i.test(file.name) && file.type !== 'image/svg+xml'){ toast('Pilih file berformat .svg'); return; }
+  file.text().then(txt => {
+    try {
+      loadSVG(txt, { fresh: true });
+      meta = { name: file.name.replace(/\.svg$/i, ''), code: genCode() };
+      fitZoom(); commit(); setDirty(true); renderMeta(); toast('SVG dibuka: ' + parts().length + ' bagian bisa diwarnai.');
+    } catch (err){ toast(err.message || 'Gagal membuka SVG.'); }
+  });
+}
+$('#openBtn').onclick = () => $('#svgFile').click();
+$('#svgFile').onchange = e => { openSvgFile(e.target.files[0]); e.target.value = ''; };
+board.addEventListener('dragover', e => { e.preventDefault(); board.classList.add('dragover'); });
+board.addEventListener('dragleave', () => board.classList.remove('dragover'));
+board.addEventListener('drop', e => {
+  e.preventDefault(); board.classList.remove('dragover');
+  const f = e.dataTransfer.files[0]; if (!f) return;
+  if (/\.svg$/i.test(f.name) || f.type === 'image/svg+xml') openSvgFile(f); else readLogoFile(f);
+});
+$('#resetBtn').onclick = () => { if (!original) return; loadSVG(original); commit(); toast('Warna dan logo dikembalikan ke awal. Tekan Urungkan untuk membatalkan.'); };
+$('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo;
+
+/* ---------- export ---------- */
+let dlP = null;
+try { if (window.claude && window.claude.use) dlP = window.claude.use('downloads').catch(() => null); } catch (e) {}
+async function getDL(){ if (!dlP && window.claude && window.claude.use) dlP = window.claude.use('downloads').catch(() => null); return dlP ? await dlP : null; }
+
+function cleanSvgString(viewBox, w, h){
+  const c = svg.cloneNode(true); c.querySelector('#__ui')?.remove();
+  c.removeAttribute('data-studio');
+  if (viewBox) c.setAttribute('viewBox', viewBox);
+  if (w){ c.setAttribute('width', w); c.setAttribute('height', h); }
+  return new XMLSerializer().serializeToString(c);
+}
+/* batas gambar sebenarnya (tanpa ruang kosong & tanpa kotak latar putih penuh) */
+function contentBox(){
+  const vb = vbBox(), vbArea = vb.w * vb.h;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const el of parts()){
+    if (el.style.display === 'none') continue;
+    const cs = getComputedStyle(el);
+    if (cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) continue;
+    const fRaw = fillOf(el), sRaw = strokeOf(el);
+    const fill = (toHex(fRaw) || (fRaw && fRaw.startsWith('url'))) && parseFloat(cs.fillOpacity) !== 0;
+    const stroke = (toHex(sRaw) || (sRaw && sRaw.startsWith('url'))) && parseFloat(cs.strokeOpacity) !== 0 && parseFloat(cs.strokeWidth) > 0;
+    if (!fill && !stroke) continue;
+    let b; try { b = el.getBBox(); } catch (_) { continue; }
+    if (!b.width && !b.height) continue;
+    const sw = stroke ? (parseFloat(el.style.strokeWidth || cs.strokeWidth) || 1) / 2 : 0;
+    const m = rootM(el);
+    const pts = [[b.x - sw, b.y - sw], [b.x + b.width + sw, b.y - sw], [b.x - sw, b.y + b.height + sw], [b.x + b.width + sw, b.y + b.height + sw]].map(([x, y]) => new DOMPoint(x, y).matrixTransform(m));
+    const xs = pts.map(q => q.x), ys = pts.map(q => q.y);
+    const bx0 = Math.min(...xs), by0 = Math.min(...ys), bx1 = Math.max(...xs), by1 = Math.max(...ys);
+    // lewati kotak latar polos yang menutupi seluruh kanvas
+    const hx = toHex(fRaw);
+    if (!stroke && hx && lum(hx) > 0.97 && (bx1 - bx0) * (by1 - by0) >= vbArea * 0.9) continue;
+    x0 = Math.min(x0, bx0); y0 = Math.min(y0, by0); x1 = Math.max(x1, bx1); y1 = Math.max(y1, by1);
+  }
+  if (!isFinite(x0) || x1 - x0 <= 0 || y1 - y0 <= 0) return vb;
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+function cropViewBox(marginPct){
+  const v = contentBox(), m = marginPct / 100 * Math.max(v.w, v.h);
+  return { x: v.x - m, y: v.y - m, w: v.w + 2 * m, h: v.h + 2 * m };
+}
+async function renderCanvas(long, marginPct){
+  const cb = cropViewBox(marginPct);
+  const v = { x: cb.x, y: cb.y, width: cb.w, height: cb.h }, m = 0;
+  const vw = cb.w, vh = cb.h;
+  const s = long / Math.max(vw, vh), W = Math.round(vw * s), H = Math.round(vh * s);
+  const str = cleanSvgString(`${v.x - m} ${v.y - m} ${vw} ${vh}`, W, H);
+  const url = URL.createObjectURL(new Blob([str], { type: 'image/svg+xml' }));
+  try {
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('Gagal merender desain.')); img.src = url; });
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d'); x.fillStyle = bg; x.fillRect(0, 0, W, H); x.drawImage(img, 0, 0, W, H);
+    return c;
+  } finally { URL.revokeObjectURL(url); }
+}
+function showFallback(blob, title){
+  const u = URL.createObjectURL(blob);
+  $('#modalTitle').textContent = title;
+  $('#modalText').textContent = 'Penyimpanan otomatis tidak tersedia di tampilan ini. Tekan lama gambar (ponsel) atau klik kanan lalu pilih "Simpan gambar".';
+  $('#modalImg').src = u; $('#modal').hidden = false;
+}
+$('#modalClose').onclick = () => { $('#modal').hidden = true; };
+async function saveFile(filename, data, fallbackBlob){
+  const dl = await getDL();
+  if (!dl){ if (fallbackBlob) showFallback(fallbackBlob, filename); else toast('Penyimpanan file tidak tersedia di tampilan ini.'); return; }
+  try { await dl.save({ filename, data }); toast('Tersimpan: ' + filename); }
+  catch (err){
+    const code = err && err.code;
+    if (code === 'declined') toast('Penyimpanan dibatalkan.');
+    else if (code === 'rate_limited') toast('Tunggu sebentar lalu coba lagi.');
+    else if (fallbackBlob) showFallback(fallbackBlob, filename);
+    else toast('File tidak bisa disimpan di tampilan ini.');
+  }
+}
+$('#exportBtn').onclick = () => { const p = $('#exportPop'); if (p.hidden) placePop(p, $('#exportBtn')); else p.hidden = true; const r = p.getBoundingClientRect(); if (r.right > innerWidth - 8) p.style.left = (innerWidth - r.width - 8) + 'px'; };
+$('#exMargin').oninput = e => $('#exMarginO').textContent = e.target.value + '%';
+$('#exJpg').onclick = async () => {
+  const btn = $('#exJpg'); btn.disabled = true; btn.textContent = 'Memproses…';
+  try {
+    const c = await renderCanvas(+$('#exRes').value, +$('#exMargin').value);
+    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', +$('#exQ').value));
+    $('#exportPop').hidden = true;
+    await saveFile(`${slug(meta.name)}-${meta.code}.jpg`, blob, blob);
+  } catch (err){ toast(err.message || 'Export gagal.'); }
+  finally { btn.disabled = false; btn.textContent = 'Unduh JPG'; }
+};
+$('#exSvg').onclick = async () => {
+  $('#exportPop').hidden = true;
+  const b = cropViewBox(+$('#exMargin').value);
+  await saveFile(`${slug(meta.name)}-${meta.code}.svg`, cleanSvgString(`${b.x} ${b.y} ${b.w} ${b.h}`), null);
+};
+
+/* ---------- library (IndexedDB) ---------- */
+const DB = {
+  db: null, ok: false, mem: new Map(),
+  async open(){
+    try {
+      this.db = await new Promise((res, rej) => {
+        const r = indexedDB.open('studio-warna-svg', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('designs', { keyPath: 'code' });
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+      });
+      this.ok = true;
+    } catch (e){ this.ok = false; }
+  },
+  run(mode, fn){
+    return new Promise((res, rej) => { try { const st = this.db.transaction('designs', mode).objectStore('designs'); const rq = fn(st); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); } catch (e){ rej(e); } });
+  },
+  async all(){ if (!this.ok) return [...this.mem.values()]; try { return await this.run('readonly', s => s.getAll()); } catch { return [...this.mem.values()]; } },
+  async get(code){ if (!this.ok) return this.mem.get(code); try { return await this.run('readonly', s => s.get(code)); } catch { return this.mem.get(code); } },
+  async put(rec){ this.mem.set(rec.code, rec); if (!this.ok) return; try { await this.run('readwrite', s => s.put(rec)); } catch (e){ throw new Error('Penyimpanan penuh atau diblokir browser.'); } },
+  async del(code){ this.mem.delete(code); if (!this.ok) return; try { await this.run('readwrite', s => s.delete(code)); } catch {} },
+};
+let libCodes = new Set();
+function normCode(v){ return (v || '').trim().toUpperCase().replace(/\s+/g, '-'); }
+function updSaveLabel(){ const c = normCode($('#libCode').value); $('#libSave').textContent = libCodes.has(c) ? 'Perbarui ' + c : 'Simpan ke pustaka'; }
+$('#libCode').addEventListener('input', () => { updSaveLabel(); });
+$('#libName').addEventListener('input', e => { meta.name = e.target.value; $('#metaName').textContent = meta.name || 'Tanpa nama'; });
+$('#libCode').addEventListener('change', e => { const c = normCode(e.target.value) || genCode(); meta.code = c; e.target.value = c; renderMeta(); });
+$('#newCodeBtn').onclick = () => { meta.code = genCode(); renderMeta(); };
+async function saveDesign(){
+  meta.name = ($('#libName').value || '').trim() || meta.name || 'Tanpa nama';
+  meta.code = normCode($('#libCode').value) || meta.code;
+  let thumb = '';
+  try { const c = await renderCanvas(240, 6); thumb = c.toDataURL('image/jpeg', 0.8); } catch {}
+  const rec = { code: meta.code, name: meta.name, svg: snapshot(), orig: original, bg, updated: Date.now(), thumb };
+  try {
+    const existed = libCodes.has(rec.code);
+    await DB.put(rec); setDirty(false); renderMeta();
+    toast((existed ? 'Diperbarui: ' : 'Disimpan: ') + rec.name + ' (' + rec.code + ')');
+    renderLib();
+  } catch (err){ toast(err.message); }
+}
+$('#libSave').onclick = saveDesign;
+$('#saveBtn').onclick = () => { switchTab('pustaka'); saveDesign(); };
+async function openDesign(code){
+  const rec = await DB.get(code);
+  if (!rec){ toast('Kode ' + code + ' tidak ditemukan.'); return; }
+  try {
+    original = rec.orig || rec.svg;
+    loadSVG(rec.svg); fitZoom(); hist = []; hi = -1; commit();
+    meta = { name: rec.name, code: rec.code }; setBg(rec.bg || bg); setDirty(false); renderMeta(); renderLib();
+    toast('Dibuka: ' + rec.name);
+  } catch (err){ toast('Desain ini rusak dan tidak bisa dibuka.'); }
+}
+async function renderLib(){
+  const all = (await DB.all()).sort((a, b) => b.updated - a.updated);
+  libCodes = new Set(all.map(r => r.code)); updSaveLabel();
+  const q = $('#libSearch').value.trim().toLowerCase();
+  const list = all.filter(r => !q || r.name.toLowerCase().includes(q) || r.code.toLowerCase().includes(q));
+  $('#libCount').textContent = all.length + ' desain';
+  $('#libNote').textContent = DB.ok ? 'Disimpan di penyimpanan browser perangkat ini. Buka lagi kapan saja lewat nama atau kode.' : 'Penyimpanan browser tidak tersedia di tampilan ini; desain hanya bertahan sampai halaman ditutup. Gunakan Unduh cadangan.';
+  const box = $('#libList'); box.replaceChildren();
+  if (!list.length){ const e = document.createElement('div'); e.className = 'empty'; e.textContent = all.length ? 'Tidak ada desain yang cocok.' : 'Belum ada desain tersimpan. Tekan Simpan ke pustaka.'; box.append(e); return; }
+  list.forEach(r => {
+    const c = document.createElement('div'); c.className = 'card' + (r.code === meta.code ? ' cur' : '');
+    const im = document.createElement('img'); im.alt = ''; if (r.thumb) im.src = r.thumb;
+    const info = document.createElement('div'); info.style.minWidth = '0';
+    const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = r.name;
+    const cd = document.createElement('span'); cd.className = 'code'; cd.textContent = r.code;
+    const dt = document.createElement('div'); dt.className = 'dt'; dt.textContent = new Date(r.updated).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+    info.append(nm, cd, dt);
+    const acts = document.createElement('div'); acts.className = 'acts';
+    const ob = document.createElement('button'); ob.className = 'btn sm'; ob.textContent = 'Buka'; ob.onclick = () => openDesign(r.code);
+    const db = document.createElement('button'); db.className = 'btn sm ghost danger'; db.textContent = 'Hapus';
+    db.onclick = async () => { if (db.dataset.sure){ await DB.del(r.code); toast('Dihapus: ' + r.code); renderLib(); } else { db.dataset.sure = 1; db.textContent = 'Yakin?'; setTimeout(() => { if (db.isConnected){ delete db.dataset.sure; db.textContent = 'Hapus'; } }, 3000); } };
+    acts.append(ob, db); c.append(im, info, acts); box.append(c);
+  });
+}
+$('#libSearch').addEventListener('input', renderLib);
+$('#libSearch').addEventListener('keydown', async e => {
+  if (e.key !== 'Enter') return;
+  const q = e.target.value.trim(); if (!q) return;
+  const all = await DB.all();
+  const hit = all.find(r => r.code.toLowerCase() === q.toLowerCase()) || all.filter(r => r.name.toLowerCase().includes(q.toLowerCase()) || r.code.toLowerCase().includes(q.toLowerCase())).length === 1 && all.find(r => r.name.toLowerCase().includes(q.toLowerCase()) || r.code.toLowerCase().includes(q.toLowerCase()));
+  if (hit) openDesign(hit.code); else toast('Tidak ada desain dengan kode atau nama itu.');
+});
+$('#backupBtn').onclick = async () => {
+  const all = await DB.all();
+  if (!all.length){ toast('Pustaka masih kosong.'); return; }
+  await saveFile(`pustaka-svg-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify({ app: 'studio-warna-svg', version: 1, designs: all }), null);
+};
+$('#restoreBtn').onclick = () => $('#restoreFile').click();
+$('#restoreFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    const items = (data.designs || []).filter(r => r && typeof r.code === 'string' && typeof r.svg === 'string');
+    for (const r of items) await DB.put({ code: normCode(r.code), name: String(r.name || 'Tanpa nama'), svg: r.svg, orig: r.orig || r.svg, bg: toHex(r.bg) || '#ffffff', updated: +r.updated || Date.now(), thumb: typeof r.thumb === 'string' && r.thumb.startsWith('data:image/') ? r.thumb : '' });
+    toast(items.length + ' desain dipulihkan.'); renderLib();
+  } catch { toast('File cadangan tidak valid.'); }
+};
+
+/* ---------- keyboard ---------- */
+document.addEventListener('keydown', e => {
+  const typing = /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !typing){ e.preventDefault(); e.shiftKey ? redo() : undo(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y' && !typing){ e.preventDefault(); redo(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); switchTab('pustaka'); saveDesign(); }
+  else if ((e.key === 'Delete' || e.key === 'Backspace') && selLogo && !typing){ e.preventDefault(); deleteLogo(selLogo); }
+  else if (!typing && !e.ctrlKey && !e.metaKey && (e.key === '+' || e.key === '=')){ zoomCenter(1.35); }
+  else if (!typing && !e.ctrlKey && !e.metaKey && (e.key === '-' || e.key === '_')){ zoomCenter(1 / 1.35); }
+  else if (!typing && !e.ctrlKey && !e.metaKey && e.key === '0'){ fitZoom(); }
+  else if (e.key === 'Escape'){ if (pk) closePicker(); else { $('#exportPop').hidden = true; $('#modal').hidden = true; clearSel(); } }
+});
+
+/* ---------- sample ---------- */
+const SAMPLE = `<svg xmlns="http://www.w3.org/2000/svg" width="627mm" height="210mm" viewBox="0 0 62700 21000" version="1.1" preserveAspectRatio="xMidYMid meet" xmlns:xlink="http://www.w3.org/1999/xlink"><svg x="0" y="0" width="29700" height="21000" viewBox="0 0 29700 21000" preserveAspectRatio="xMidYMid meet"><defs>
+  <style type="text/css">
+   
+    .str3 {stroke:#332C2B;stroke-width:7.62;stroke-miterlimit:22.9256}
+    .str0 {stroke:#332C2B;stroke-width:7.62;stroke-miterlimit:22.9256}
+    .str2 {stroke:#332C2B;stroke-width:7.62;stroke-miterlimit:2.61313}
+    .str1 {stroke:black;stroke-width:7.62;stroke-miterlimit:22.9256}
+    .fil0 {fill:#FEFEFE}
+   
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer" />
+  <path class="fil0 str0" d="M18653.09 6927.71l-31.11 9870.48c-2769.97,549.93 -5547,627.5 -8334.57,0l27.32 -9878.93 0.02 0 0.34 -0.34c1157.56,-1043.95 1801.96,-2472.74 2614.07,-3775.86 14.37,0.44 28.7,0.95 43.06,1.55 964.97,363.01 1949.87,332.48 2951.26,-22.12l37.9 11.76c812.19,1303.26 1456.63,2732.25 2614.43,3776.22l77.28 17.24z" />
+  <path class="fil0 str0" d="M19466.06 6927.71l31.1 9870.48c2811.36,547.1 5593.53,612.8 8334.57,0l-27.32 -9878.93 -0.02 0 -0.34 -0.34c-1157.56,-1043.95 -1801.96,-2472.74 -2614.07,-3775.86 -14.37,0.44 -28.7,0.95 -43.06,1.55 -952.97,21.1 -1938.46,6.56 -2951.26,-22.12l-37.9 11.76c-812.19,1303.26 -1456.63,2732.25 -2614.43,3776.22l-77.27 17.24z" />
+  <path class="fil0 str1" d="M25214.07 2789.16l-24.09 353.89c-910.93,165.23 -2003.54,158 -3043.34,10.67l-30.1 -364.5c918.85,87.05 2077.95,93.25 3097.53,-0.06z" />
+  <path class="fil0 str0" d="M13295.27 3250.32c714.54,203.58 1460.44,215.24 2243.97,-3.5 105.18,-129.38 210.13,-277.17 314.79,-443.22 -975.35,433.8 -1932.34,411.58 -2872.87,16.36 104.76,161.04 209.47,304.42 314.11,430.36zm2596.01 -441.04l-0.4 -22.22 -6.59 2.95c2.43,6.41 4.76,12.82 6.99,19.27z" />
+  <path class="fil0 str0" d="M12981.16 2819.96c-65.56,154.2 -78.66,290.97 -25.83,405.84 991.96,1376.15 1974.09,1308.62 2947.83,11.06 39.01,-165.4 33.9,-322.16 -27.28,-467.9 -948.09,1528.13 -1919.28,1550.45 -2894.72,51z" />
+  <path class="fil0 str0" d="M12945.63 2919.18l-82.97 331.46c-0.97,3.86 -0.88,6.48 -2.2,8.74 -729.17,1244.75 -1480.07,2698.99 -2545.37,3659.54l-7968.25 1632.87c-278.07,-658.26 -457.8,-1311.57 -560.2,-1961.02 2428.21,-906.26 5842.82,-2061.46 8683.07,-3050.91 843.46,-293.85 1585.56,-678.39 2475.92,-620.68z" />
+  <path class="fil0 str2" d="M1786.64 6590.76c4470.56,-1718.73 10881.78,-4179.08 11159,-3671.59l-8.11 205.6 -77.07 134.61c-730.97,-163.23 -6928.91,2072.7 -10980.17,3659.24l-93.65 -327.86z" />
+  <polygon class="fil0 str3" points="1223.58,7092.18 1825.12,6725.44 2308.36,8417.1 1701.54,8516.76 " />
+  <path class="fil0 str0" d="M12981.16 2819.96c-65.56,154.2 -78.66,290.97 -25.83,405.84 991.96,1376.15 1974.09,1308.62 2947.83,11.06 39.01,-165.4 33.9,-322.16 -27.28,-467.9 -948.09,1528.13 -1919.28,1550.45 -2894.72,51z" />
+ </g>
+</svg><svg x="29700" y="0" width="33000" height="21000" viewBox="0 0 33000 21000" preserveAspectRatio="xMidYMid meet"><defs>
+  <style type="text/css">
+   
+    .str1 {stroke:black;stroke-width:26.46;stroke-miterlimit:22.9256}
+    .str0 {stroke:black;stroke-width:26.46;stroke-miterlimit:2.61313}
+    .str4 {stroke:#332C2B;stroke-width:20;stroke-miterlimit:22.9256}
+    .str2 {stroke:#332C2B;stroke-width:7.62;stroke-miterlimit:2.61313}
+    .str3 {stroke:#332C2B;stroke-width:7.62;stroke-miterlimit:2.61313}
+    .fil1 {fill:none}
+    .fil0 {fill:#FEFEFE}
+   
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer" />
+  <path class="fil0 str0" d="M6171.32 19040.59c1209.25,248.26 2442.24,283.34 3694.73,142.83l12.74 0.51c54.31,-3146.78 647.51,-6239.38 1047.92,-9406.17 144.38,-1102.51 171,-1253.98 376.81,-2190.24 536,-1299.08 918.03,-1824.39 1374.49,-3329.98 135.76,-987.01 67.87,-1638.38 -81.46,-2480.12l-4754.65 -108.61 823.22 31.42 -952.66 -17.26 0.24 -17.1 -2121.45 -48.45 580.07 17423.17z" />
+  <path class="fil0 str1" d="M27413.14 18601.26c-1039.95,434.72 -2196.78,713.62 -3431.22,889.16 -814.07,-3076.8 -2118.88,-5991.6 -3261.38,-9018.14 -402.44,-1052.68 -707.59,-1709.35 -1127.13,-2586.51l-340.74 -6246.63 4514.12 -65.4 3646.35 17027.52z" />
+  <path class="fil0 str1" d="M12478.59 18893.12c1088.47,509.84 2244.38,759.71 3484.06,686.43 606.22,-3118.41 1712.98,-6103.92 2650.34,-9191.43 331.06,-1074.17 620.55,-1602.34 980.42,-2502.35 1106.34,-1884.03 1010.62,-3979.96 86.74,-6252.8l-2569.04 37.08 -2147.67 27.06c-828.29,5732 -1656.59,11464 -2484.85,17196.01z" />
+  <path class="fil0 str1" d="M23774.98 917.55l3.09 656.29c-2699.59,355.74 -5683.3,332.91 -8804.22,127.04l-27.05 -673c3057.58,210.74 6029.94,240.61 8828.18,-110.33z" />
+  <path class="fil0 str1" d="M5586.86 1014.25l21.83 692.09c2308.77,256.23 4677.66,317.47 7029.59,163.32l-164.42 -736.61c-2336.19,213.52 -4550.82,142.81 -6887,-118.8z" />
+  <path class="fil1 str1" d="M7554.53 1850.7c-886.66,2144.53 -32.29,3205.75 20.35,4266.75l-5.78 -4266.42 -2.86 190.79 2.86 -190.79 0 0" />
+  <g id="_2321634001616">
+   <polygon class="fil0 str2" points="7568.73,1875.78 8507.18,1923.09 8517.17,19177.04 7572.3,19145.24 " />
+   <polygon class="fil0 str3" points="12487.38,18897.22 12586.96,18942.91 12950.25,19012 15548.25,1736.76 14963.44,1697.11 " />
+   <polygon class="fil0 str3" points="27413.14,18601.26 23766.8,1573.74 23251.05,1638.12 26976.77,18772.18 " />
+  </g>
+  <g id="_2321633999264">
+   <path class="fil0 str4" d="M12573.44 18936.79l3311.12 660.94 -399.36 517.63c-955.12,-29.86 -1883.57,-192.87 -2773.9,-546.71 0,0 -161.05,-632.77 -137.86,-631.86z" />
+   <path class="fil0 str4" d="M27215.79 18682.3l-6.32 1.52c-940.21,369.65 -1971.23,618.22 -3065.29,782.85l370.21 479.84c922.54,-119.09 1824.36,-303.09 2660.48,-692.48 0,0 117.35,-591.54 40.92,-571.73z" />
+   <path class="fil0 str4" d="M6290.47 19102.11l3374.53 113.57 -309.84 575.7c-941.97,135.15 -1883.93,122.24 -2825.89,-88.23 0,0 -261.84,-598.17 -238.8,-601.04z" />
+  </g>
+ </g>
+</svg></svg>`;
+function sampleLogo(){
+  const c = document.createElement('canvas'); c.width = c.height = 360;
+  const x = c.getContext('2d'); x.translate(180, 180);
+  x.fillStyle = '#f6d55c'; x.beginPath(); x.arc(0, 0, 172, 0, Math.PI * 2); x.fill();
+  x.strokeStyle = '#1b1f24'; x.lineWidth = 9; x.beginPath(); x.arc(0, 0, 150, 0, Math.PI * 2); x.stroke();
+  x.fillStyle = '#1b1f24'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  const f = '"Plus Jakarta Sans", system-ui, sans-serif';
+  x.font = `700 24px ${f}`; x.fillText('EST. 2026', 0, -78);
+  x.font = `800 92px ${f}`; x.fillText('KOPI', 0, 2);
+  x.font = `800 40px ${f}`; x.fillText('SENJA', 0, 70);
+  return c.toDataURL('image/png');
+}
+
+/* ---------- init ---------- */
+(async () => {
+  setBg(bg); updUndo();
+  loadSVG(SAMPLE, { fresh: true });
+  commit(); setDirty(false); refresh();
+  await DB.open(); renderLib();
+})();
+})();
+</script>
+
+</body></html>
